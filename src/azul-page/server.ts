@@ -106,37 +106,6 @@ class AzulPageServer {
       .digest('hex')
   }
 
-  generateCheckoutForm(userPaymentPageRequest: PaymentPageRequest) {
-    const paymentPageRequestResult = PaymentPageRequest.safeParse(userPaymentPageRequest);
-    
-    if (!paymentPageRequestResult.success) {
-      throw new Error("Invalid payment page request");
-    }
-
-    console.log("paymentPageRequestResult.data:", paymentPageRequestResult.data)
-    const paymentPageRequest = paymentPageRequestResult.data;
-    const authHash = this.authHash(paymentPageRequest);
-    return `<html>
-<body>
-<form method="POST" action="${this.azulURL}">
-<input type="hidden" id="MerchantId" name="MerchantId" value="${this.config.merchantId}" />
-<input type="hidden" id="MerchantName" name="MerchantName" value="${this.config.merchantName}" />
-<input type="hidden" id="MerchantType" name="MerchantType" value="${this.config.merchantType}" />
-<input type="hidden" id="CurrencyCode" name="CurrencyCode" value="${paymentPageRequest.currencyCode}" />
-<input type="hidden" id="OrderNumber" name="OrderNumber" value="${paymentPageRequest.orderNumber}" />
-<input type="hidden" id="Amount" name="Amount" value="${paymentPageRequest.amount}" />
-<input type="hidden" id="ITBIS" name="ITBIS" value="${paymentPageRequest.itbis}" />
-<input type="hidden" id="ApprovedUrl" name="ApprovedUrl" value="${paymentPageRequest.approvedUrl}" />
-<input type="hidden" id="DeclinedUrl" name="DeclinedUrl" value="${paymentPageRequest.declinedUrl}" />
-<input type="hidden" id="CancelUrl" name="CancelUrl" value="${paymentPageRequest.cancelUrl}" />
-<input type="hidden" id="UseCustomField1" name="UseCustomField1" value="${paymentPageRequest.useCustomField1}" />
-<input type="hidden" id="UseCustomField2" name="UseCustomField2" value="${paymentPageRequest.useCustomField2}" />
-<input type="hidden" id="AuthHash" name="AuthHash" value="${authHash}" />
-<input type="submit" value="Pay Now" />
-</body>
-<html>`
-  }
-
   async createSession(
     userPaymentPageRequest: PaymentPageRequest
   ): Promise<Session> {

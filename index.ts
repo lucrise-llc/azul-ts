@@ -3,15 +3,15 @@ import AzulPageServer from "./src/azul-page/server";
 const azulPageServer = new AzulPageServer({
   merchantId: "",
   merchantName: "RapidoTickets",
-  merchantType: "TicketsDigitales",
+  merchantType: "Ecommerce",
   authKey: "",
   environment: "dev",
 });
 
 Bun.serve({
   port: 8080,
-  fetch(req) {
-    const checkoutPageHTML = azulPageServer.generateCheckoutForm({
+  async fetch(req) {
+    const { url: redirectURL } = await azulPageServer.createSession({
       currencyCode: "$",
       orderNumber: "1234",
       amount: 1000,
@@ -21,9 +21,11 @@ Bun.serve({
       cancelUrl: "https://rapidotickets.com/",
     });
 
-    return new Response(checkoutPageHTML, {
+    // Redirect to the payment page
+    return new Response(null, {
+      status: 302,
       headers: {
-        "Content-Type": "text/html",
+        Location: redirectURL,
       },
     });
   },
