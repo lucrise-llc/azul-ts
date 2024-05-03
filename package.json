@@ -1,6 +1,6 @@
 {
-  "name": "azults",
-  "version": "1.0.0",
+  "name": "@lucrise/azul-ts",
+  "version": "0.0.1",
   "main": "index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -9,16 +9,17 @@
     "build": "tsc",
     "start": "npm run build && node dist/index.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["azul", "payment", "sdk", "visa", "mastercard"],
+  "author": "Lucrise",
   "license": "ISC",
-  "description": "",
+  "description": "SDK for Azul",
   "devDependencies": {
     "@types/express": "^4.17.21",
     "@types/node": "^20.12.8",
     "husky": "^9.0.11",
     "lint-staged": "^15.2.2",
     "prettier": "3.2.5",
+    "semantic-release": "^23.0.8",
     "typescript": "^5.4.5"
   },
   "dependencies": {
@@ -33,5 +34,8 @@
       "prettier --write"
     ],
     "*.{js,css,md}": "prettier --write"
+  },
+  "release": {
+    "branches": ["main"]
   }
 }

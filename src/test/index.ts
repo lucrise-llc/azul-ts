@@ -22,7 +22,7 @@ app.get('/', (req, res) => {
 app.get('/buy-ticket', async (req, res) => {
   res.send(
     azul.createForm({
-      orderNumber: '1234',
+      orderNumber: '12345',
       amount: 1000,
       ITBIS: 100,
       approvedUrl: 'https://rapidotickets.com/',
