@@ -281,6 +281,11 @@ class AzulAPI {
     return this.checkAzulResponse(response);
   }
 
+  async verifyPayment(customOrderId: string): Promise<AzulResponseWithOk> {
+    const response = await this.request({ customOrderId });
+    return this.checkAzulResponse(response);
+  }
+
   private checkAzulResponse(json: any): AzulResponseWithOk {
     return {
       ...json,
