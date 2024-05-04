@@ -7,7 +7,17 @@ import { Prettify, capitalizeKeys } from './utils';
 
 type TrxType = 'Sale' | 'Void' | 'Refund';
 
-const Channel = z.string().max(3).optional().default('EC');
+const channel = z.string().max(3).optional().default('EC');
+const azulOrderId = z.string().max(8);
+const amount = z.number().int().positive();
+const ITBIS = z.number().int().positive();
+
+const PostSchema = z.object({
+  channel,
+  azulOrderId,
+  amount,
+  ITBIS
+});
 
 const ProcessPaymentSchema = z.object({
   /**
@@ -15,7 +25,7 @@ const ProcessPaymentSchema = z.object({
    * Este valor es proporcionado por AZUL, junto a los
    * datos de acceso a cada ambiente
    */
-  channel: Channel,
+  channel,
   /**
    * Número de tarjeta a la cual se le ha de cargar la
    * transacción.
@@ -47,7 +57,7 @@ const ProcessPaymentSchema = z.object({
    * Ej. 1000 equivale a 10.00
    * Ej. 1748321 equivale a 17,483.21
    */
-  amount: z.number().int().positive(),
+  amount,
   /**
    * Valor del ITBIS. Mismo formato que el campo
    * Amount. El valor enviado en el campo de ITBIS no
@@ -60,7 +70,7 @@ const ProcessPaymentSchema = z.object({
    * Este valor deberá también ser incluido en el cálculo
    * del hash.
    */
-  ITBIS: z.number().int().positive(),
+  ITBIS,
   /**
    * Número de orden asociado a la transacción. Puede
    * viajar nulo, pero siempre debe de estar presente.
@@ -265,6 +275,12 @@ class AzulAPI {
     return this.checkAzulResponse(response);
   }
 
+  async post(postRequest: z.input<typeof PostSchema>): Promise<AzulResponseWithOk> {
+    const validated = PostSchema.parse(postRequest);
+    const response = await this.request(validated);
+    return this.checkAzulResponse(response);
+  }
+
   private checkAzulResponse(json: any): AzulResponseWithOk {
     return {
       ...json,
@@ -272,9 +288,12 @@ class AzulAPI {
     };
   }
 
-  private async request(body: any, trxType: TrxType) {
+  private async request(body: any, trxType?: TrxType) {
+    if (trxType) {
+      body.trxType = trxType;
+    }
+
     const fullBody = capitalizeKeys({
-      trxType,
       channel: this.config.channel,
       store: this.config.merchantId,
       ...body
