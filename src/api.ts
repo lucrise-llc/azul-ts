@@ -273,8 +273,11 @@ class AzulAPI {
    * @returns Respuesta de la transacción
    */
   async sale(saleRequest: ProcessPaymentSchemaInput): Promise<AzulResponseWithOk> {
-    const validated = ProcessPaymentSchema.parse(saleRequest);
-    const response = await this.request(validated, 'Sale');
+    const response = await this.safeRequest({
+      body: ProcessPaymentSchema.parse(saleRequest),
+      trxType: 'Sale'
+    });
+
     return this.checkAzulResponse(response);
   }
 
@@ -297,30 +300,62 @@ class AzulAPI {
    * 5. El Void libera o cancela los fondos retenidos.
    */
   async hold(saleRequest: ProcessPaymentSchemaInput): Promise<AzulResponseWithOk> {
-    const validated = ProcessPaymentSchema.parse(saleRequest);
-    const response = await this.request(validated, 'Hold');
+    const response = await this.safeRequest({
+      body: ProcessPaymentSchema.parse(saleRequest),
+      trxType: 'Hold'
+    });
+
     return this.checkAzulResponse(response);
   }
 
   async void(azulOrderId: string): Promise<AzulResponseWithOk> {
-    const response = await this.request({ azulOrderId }, 'Void');
+    const response = await this.safeRequest({
+      body: { azulOrderId },
+      trxType: 'Void'
+    });
+
     return this.checkAzulResponse(response);
   }
 
   async refund(refundRequest: z.input<typeof RefundRequestSchema>): Promise<AzulResponseWithOk> {
-    const validated = RefundRequestSchema.parse(refundRequest);
-    const response = await this.request(validated, 'Refund');
+    const response = await this.safeRequest({
+      body: RefundRequestSchema.parse(refundRequest),
+      trxType: 'Refund'
+    });
+
     return this.checkAzulResponse(response);
   }
 
   async post(postRequest: z.input<typeof PostSchema>): Promise<AzulResponseWithOk> {
-    const validated = PostSchema.parse(postRequest);
-    const response = await this.request(validated);
+    const response = await this.safeRequest({
+      body: PostSchema.parse(postRequest)
+    });
+
     return this.checkAzulResponse(response);
   }
 
   async verifyPayment(customOrderId: string): Promise<AzulResponseWithOk> {
-    const response = await this.request({ customOrderId });
+    const response = await this.safeRequest({
+      body: { customOrderId }
+    });
+
+    return this.checkAzulResponse(response);
+  }
+
+  /**
+   * Este método permite extraer los detalles de una o varias transacciones
+   * vía Webservices, anteriormente procesadas de un rango de fechas
+   * previamente seleccionado.
+   */
+  async search({ from, to }: { from: string; to: string }): Promise<AzulResponseWithOk> {
+    const response = await this.safeRequest({
+      url: this.azulURL + '?SearchPayments',
+      body: {
+        dateFrom: from,
+        dateTo: to
+      }
+    });
+
     return this.checkAzulResponse(response);
   }
 
@@ -331,7 +366,15 @@ class AzulAPI {
     };
   }
 
-  private async request(body: any, trxType?: TrxType) {
+  private async safeRequest({
+    body,
+    trxType,
+    url
+  }: {
+    body: any;
+    trxType?: TrxType;
+    url?: string;
+  }) {
     if (trxType) {
       body.trxType = trxType;
     }
@@ -342,7 +385,7 @@ class AzulAPI {
       ...body
     });
 
-    const response = await fetch(this.azulURL, {
+    const response = await fetch(url || this.azulURL, {
       method: 'POST',
       headers: {
         Auth1: this.config.auth1,
