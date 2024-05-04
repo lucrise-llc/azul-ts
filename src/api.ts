@@ -1,11 +1,13 @@
-import z from "zod";
-import https from "https";
-import fetch from "node-fetch";
-import path from "path";
-import fs from "fs/promises";
-import { Prettify, capitalizeKeys } from "./utils";
+import z from 'zod';
+import https from 'https';
+import fetch from 'node-fetch';
+import path from 'path';
+import fs from 'fs/promises';
+import { Prettify, capitalizeKeys } from './utils';
 
-type TrxType = "Sale" | "Void" | "Refund";
+type TrxType = 'Sale' | 'Void' | 'Refund';
+
+const Channel = z.string().max(3).optional().default('EC');
 
 const ProcessPaymentSchema = z.object({
   /**
@@ -13,7 +15,7 @@ const ProcessPaymentSchema = z.object({
    * Este valor es proporcionado por AZUL, junto a los
    * datos de acceso a cada ambiente
    */
-  channel: z.string().max(3).optional().default("EC"),
+  channel: Channel,
   /**
    * Número de tarjeta a la cual se le ha de cargar la
    * transacción.
@@ -36,7 +38,7 @@ const ProcessPaymentSchema = z.object({
    * Este valor es proporcionado por AZUL, junto a los
    * datos de acceso a cada ambiente
    */
-  posInputMode: z.string().max(10).optional().default("E-Commerce"),
+  posInputMode: z.string().max(10).optional().default('E-Commerce'),
   /**
    * Monto total de la transacción (Impuestos
    * incluidos.)
@@ -68,7 +70,7 @@ const ProcessPaymentSchema = z.object({
    * Uso Interno AZUL
    * Valor Fijo: 1
    */
-  acquirerRefData: z.enum(["0", "1"]).optional(),
+  acquirerRefData: z.enum(['0', '1']).optional(),
   /**
    * Número de servicio para atención telefónica del
    * establecimiento. Ej.: 8095442985
@@ -115,19 +117,26 @@ const ProcessPaymentSchema = z.object({
    * valor en 1, SDP le devolverá el token generado en
    * el campo DataVaultToken
    */
-  saveToDataVault: z.enum(["1", "2"]).optional(),
+  saveToDataVault: z.enum(['1', '2']).optional(),
   /**
    * Valores posibles 0 =no, 1 = Si. Si se envía el valor en
    * ‘0’, la transacción se procesa con 3D Secure. Si se
    * envía el valor en ‘1’ la transacción se procesa sin
    * 3D Secure.
    */
-  forceNo3DS: z.enum(["0", "1"]).optional(),
+  forceNo3DS: z.enum(['0', '1']).optional()
 });
+
+const RefundRequestSchema = z
+  .object({
+    OriginalDate: z.string().length(8),
+    OriginalTrxTicketNr: z.string().length(4).optional()
+  })
+  .merge(ProcessPaymentSchema);
 
 type ProcessPaymentSchemaInput = z.input<typeof ProcessPaymentSchema>;
 
-type SaleResponse = {
+type AzulResponse = {
   /**
    * Código de autorización generado por el centro autorizador para la
    * transacción.
@@ -177,7 +186,7 @@ type SaleResponse = {
    * campo ISOCode para ver la respuesta de la transacción Error =
    * La transacción no fue procesada.
    */
-  ResponseCode: "ISO8583" | "Error";
+  ResponseCode: 'ISO8583' | 'Error';
   /**
    * Mensaje de respuesta ISO-8583.
    * Valor sólo presente si el ResponseCode = ISO8583
@@ -191,8 +200,18 @@ type SaleResponse = {
    * Tarjeta usada para la transacción, enmascarada
    * (XXXXXX******XXXX)
    */
-  CardNumber: string;
+  // CardNumber: string;
 };
+
+type AzulResponseWithOk = Prettify<
+  Partial<AzulResponse> & {
+    /**
+     * Indica que la transacción fue exitosa.
+     * Su valor es `true` si ResponseCode no es `Error` y ISOCode es `00`.
+     */
+    ok: boolean;
+  }
+>;
 
 type AzulConfig = {
   auth1: string;
@@ -200,12 +219,13 @@ type AzulConfig = {
   merchantId: string;
   certificatePath: string;
   keyPath: string;
-  environment?: "dev" | "prod";
+  environment?: 'dev' | 'prod';
+  channel?: string;
 };
 
 enum AzulURL {
-  DEV = "https://pruebas.azul.com.do/webservices/JSON/Default.aspx",
-  PROD = "https://pagos.azul.com.do/webservices/JSON/Default.aspx",
+  DEV = 'https://pruebas.azul.com.do/webservices/JSON/Default.aspx',
+  PROD = 'https://pagos.azul.com.do/webservices/JSON/Default.aspx'
 }
 
 class AzulAPI {
@@ -217,49 +237,58 @@ class AzulAPI {
   constructor(config: AzulConfig) {
     this.config = config;
 
-    if (config.environment === undefined || config.environment === "dev") {
+    if (this.config.channel === undefined) {
+      this.config.channel = 'EC';
+    }
+
+    if (config.environment === undefined || config.environment === 'dev') {
       this.azulURL = AzulURL.DEV;
     } else {
       this.azulURL = AzulURL.PROD;
     }
   }
 
-  async sale(saleRequest: ProcessPaymentSchemaInput): Promise<
-    Prettify<
-      Partial<SaleResponse> & {
-        /**
-         * Indica que la transacción fue exitosa.
-         * Su valor es `true` si ResponseCode no es `Error` y ISOCode es `00`.
-         */
-        ok: boolean;
-      }
-    >
-  > {
-    const validatedRequest = ProcessPaymentSchema.parse(saleRequest);
-    const json = await this.request(validatedRequest, "Sale");
+  async sale(saleRequest: ProcessPaymentSchemaInput): Promise<AzulResponseWithOk> {
+    const validated = ProcessPaymentSchema.parse(saleRequest);
+    const response = await this.request(validated, 'Sale');
+    return this.checkAzulResponse(response);
+  }
 
+  async void(azulOrderId: string): Promise<AzulResponseWithOk> {
+    const response = await this.request({ azulOrderId }, 'Void');
+    return this.checkAzulResponse(response);
+  }
+
+  async refund(refundRequest: z.input<typeof RefundRequestSchema>): Promise<AzulResponseWithOk> {
+    const validated = RefundRequestSchema.parse(refundRequest);
+    const response = await this.request(validated, 'Refund');
+    return this.checkAzulResponse(response);
+  }
+
+  private checkAzulResponse(json: any): AzulResponseWithOk {
     return {
-      ok: json.ResponseCode !== "Error" && json.IsoCode === "00",
       ...json,
+      ok: json.ResponseCode !== 'Error' && json.IsoCode === '00'
     };
   }
 
-  async request(body: any, trxType: TrxType) {
+  private async request(body: any, trxType: TrxType) {
     const fullBody = capitalizeKeys({
-      ...body,
       trxType,
+      channel: this.config.channel,
       store: this.config.merchantId,
+      ...body
     });
 
     const response = await fetch(this.azulURL, {
-      method: "POST",
+      method: 'POST',
       headers: {
         Auth1: this.config.auth1,
         Auth2: this.config.auth2,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json'
       },
       agent: new https.Agent(await this.getCertificates()),
-      body: JSON.stringify(capitalizeKeys(fullBody)),
+      body: JSON.stringify(capitalizeKeys(fullBody))
     });
 
     return await response.json();
@@ -269,24 +298,16 @@ class AzulAPI {
     if (this.certificate && this.certificateKey) {
       return {
         cert: this.certificate,
-        key: this.certificateKey,
+        key: this.certificateKey
       };
     }
 
-    const certificate = await fs.readFile(
-      path.resolve(__dirname, this.config.certificatePath)
-    );
-
-    const certificateKey = await fs.readFile(
-      path.resolve(__dirname, this.config.keyPath)
-    );
-
-    this.certificate = certificate;
-    this.certificateKey = certificateKey;
+    this.certificate = await fs.readFile(path.resolve(__dirname, this.config.certificatePath));
+    this.certificateKey = await fs.readFile(path.resolve(__dirname, this.config.keyPath));
 
     return {
       cert: this.certificate,
-      key: this.certificateKey,
+      key: this.certificateKey
     };
   }
 }
