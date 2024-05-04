@@ -258,6 +258,20 @@ class AzulAPI {
     }
   }
 
+  /**
+   * ### SALE: Transacción de venta
+   * Esta es la transacción principal utilizada para someter una autorización de una tarjeta
+   * por la venta de un bien o servicio.
+   * Las ventas realizadas con la transacción “Sale” son capturadas automáticamente para
+   * su liquidación, por lo que sólo pueden ser anuladas con una transacción de “Void” en
+   * un lapso de no más de 20 minutos luego de recibir respuesta de aprobación.
+   *
+   * Luego de transcurridos estos 20 minutos, la transacción será liquidada y se debe realizar
+   * una transacción de “Refund” o devolución para devolver los fondos a la tarjeta.
+   *
+   * @param saleRequest Datos de la transacción de venta
+   * @returns Respuesta de la transacción
+   */
   async sale(saleRequest: ProcessPaymentSchemaInput): Promise<AzulResponseWithOk> {
     const validated = ProcessPaymentSchema.parse(saleRequest);
     const response = await this.request(validated, 'Sale');
