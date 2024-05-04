@@ -1,8 +1,9 @@
-import { PostSchema, PostSchemaInput } from './schemas';
+import { PostSchema, PostSchemaInput, SearchSchema, SearchSchemaInput } from './schemas';
 import AzulRequester, { Config } from './request';
 import DataVault from './data-vault/data-vault';
 import ProcessPayment from './process-payment/process-payment ';
 import { ProcessPaymentResponse } from './process-payment/schemas';
+import { Process } from './processes';
 
 class AzulAPI {
   private requester: AzulRequester;
@@ -24,12 +25,7 @@ class AzulAPI {
    * anularse.
    */
   async void(azulOrderId: string): Promise<ProcessPaymentResponse> {
-    return await this.requester.safeRequest({
-      url: this.requester.url + '?ProcessVoid',
-      body: {
-        azulOrderId
-      }
-    });
+    return await this.requester.safeRequest({ azulOrderId }, Process.Void);
   }
 
   /**
@@ -40,12 +36,7 @@ class AzulAPI {
    * fondos retenidos a la tarjeta.
    */
   async post(input: PostSchemaInput): Promise<ProcessPaymentResponse> {
-    return await this.requester.safeRequest({
-      url: this.requester.url + '?ProcessPost',
-      body: {
-        ...PostSchema.parse(input)
-      }
-    });
+    return await this.requester.safeRequest(PostSchema.parse(input), Process.Post);
   }
 
   /**
@@ -57,12 +48,7 @@ class AzulAPI {
    * valores de la última transacción (más reciente) de ellas.
    */
   async verifyPayment(customOrderId: string): Promise<ProcessPaymentResponse> {
-    return await this.requester.safeRequest({
-      url: this.requester.url + '?VerifyPayment',
-      body: {
-        customOrderId
-      }
-    });
+    return await this.requester.safeRequest({ customOrderId }, Process.VerifyPayment);
   }
 
   /**
@@ -70,14 +56,8 @@ class AzulAPI {
    * vía Webservices, anteriormente procesadas de un rango de fechas
    * previamente seleccionado.
    */
-  async search({ from, to }: { from: string; to: string }): Promise<ProcessPaymentResponse> {
-    return await this.requester.safeRequest({
-      url: this.requester.url + '?SearchPayments',
-      body: {
-        dateFrom: from,
-        dateTo: to
-      }
-    });
+  async search(input: SearchSchemaInput): Promise<ProcessPaymentResponse> {
+    return await this.requester.safeRequest(SearchSchema.parse(input), Process.SearchPayments);
   }
 }
 

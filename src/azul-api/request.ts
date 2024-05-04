@@ -3,6 +3,7 @@ import https from 'https';
 import fs from 'fs/promises';
 import fetch from 'node-fetch';
 import { capitalizeKeys } from '../utils';
+import { Process } from './processes';
 
 enum AzulURL {
   DEV = 'https://pruebas.azul.com.do/webservices/JSON/Default.aspx',
@@ -51,8 +52,14 @@ class AzulRequester {
     }
   }
 
-  async safeRequest({ body, url }: { body: any; url?: string }) {
-    const response = await fetch(url || this.url, {
+  async safeRequest(body: any, process?: Process) {
+    let url = this.url;
+
+    if (process) {
+      url = url + '?' + process;
+    }
+
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         Auth1: this.auth1,

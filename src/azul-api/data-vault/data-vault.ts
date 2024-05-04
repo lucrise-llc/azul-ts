@@ -1,3 +1,4 @@
+import { Process } from '../processes';
 import AzulRequester from '../request';
 import { Create, CreateInput, Delete, DeleteInput, DataVaultResponse } from './shemas';
 
@@ -19,13 +20,13 @@ class DataVault {
    * sin necesidad de realizar una venta.
    */
   async create(input: CreateInput): Promise<DataVaultResponse> {
-    return await this.requester.safeRequest({
-      url: this.requester.url + '?ProcessDatavault',
-      body: {
+    return await this.requester.safeRequest(
+      {
         ...Create.parse(input),
         trxType: DataVaultTransaction.CREATE
-      }
-    });
+      },
+      Process.Datavault
+    );
   }
 
   /**
@@ -33,13 +34,13 @@ class DataVault {
    * Con esta transacción se solicita la eliminación de un token de la Bóveda de Datos.
    */
   async delete(input: DeleteInput): Promise<DataVaultResponse> {
-    return await this.requester.safeRequest({
-      url: this.requester.url + '?ProcessDatavault',
-      body: {
+    return await this.requester.safeRequest(
+      {
         ...Delete.parse(input),
         trxType: DataVaultTransaction.DELETE
-      }
-    });
+      },
+      Process.Datavault
+    );
   }
 }
 

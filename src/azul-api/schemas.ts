@@ -54,4 +54,18 @@ export const PostSchema = z.object({
   ITBIS
 });
 
+export const SearchSchema = z.object({
+  // YYYY-MM-DD
+  dateFrom: z
+    .string()
+    .length(10)
+    .regex(/^\d{4}-\d{2}-\d{2}$/),
+  // YYYY-MM-DD
+  dateTo: z
+    .string()
+    .length(10)
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+});
+
+export type SearchSchemaInput = z.infer<typeof SearchSchema>;
 export type PostSchemaInput = z.infer<typeof PostSchema>;

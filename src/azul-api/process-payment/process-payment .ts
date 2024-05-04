@@ -27,10 +27,8 @@ class ProcessPayment {
    */
   async sale(input: ProcessPaymentSchemaInput): Promise<ProcessPaymentResponse> {
     return await this.requester.safeRequest({
-      body: {
-        ...ProcessPaymentSchema.parse(input),
-        trxType: ProcessPaymentTransaction.SALE
-      }
+      ...ProcessPaymentSchema.parse(input),
+      trxType: ProcessPaymentTransaction.SALE
     });
   }
 
@@ -51,10 +49,8 @@ class ProcessPayment {
    */
   async refund(input: ProcessPaymentSchemaInput): Promise<ProcessPaymentResponse> {
     return await this.requester.safeRequest({
-      body: {
-        ...ProcessPaymentSchema.parse(input),
-        trxType: ProcessPaymentTransaction.REFUND
-      }
+      ...ProcessPaymentSchema.parse(input),
+      trxType: ProcessPaymentTransaction.REFUND
     });
   }
 
@@ -78,10 +74,8 @@ class ProcessPayment {
    */
   async hold(input: ProcessPaymentSchemaInput): Promise<ProcessPaymentResponse> {
     return await this.requester.safeRequest({
-      body: {
-        ...ProcessPaymentSchema.parse(input),
-        trxType: ProcessPaymentTransaction.HOLD
-      }
+      ...ProcessPaymentSchema.parse(input),
+      trxType: ProcessPaymentTransaction.HOLD
     });
   }
 }
