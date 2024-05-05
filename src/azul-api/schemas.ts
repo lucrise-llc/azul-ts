@@ -58,19 +58,21 @@ export const PostSchema = z
 export type PostSchemaInput = z.input<typeof PostSchema>;
 
 export const SearchSchema = z.object({
-  // YYYY-MM-DD
-  dateFrom: z
-    .string()
-    .length(10)
-    .regex(/^\d{4}-\d{2}-\d{2}$/),
-  // YYYY-MM-DD
-  dateTo: z
-    .string()
-    .length(10)
-    .regex(/^\d{4}-\d{2}-\d{2}$/)
+  /**
+   * Fecha de inicio del rango de búsqueda.
+   * Debes tener en cuenta que el sistema *sólo*
+   * tomará en cuenta la fecha, ignorando la hora.
+   */
+  dateFrom: z.date().transform((date) => date.toISOString().split('T')[0]),
+  /**
+   * Fecha final del rango de búsqueda.
+   * Debes tener en cuenta que el sistema *sólo*
+   * tomará en cuenta la fecha, ignorando la hora.
+   */
+  dateTo: z.date().transform((date) => date.toISOString().split('T')[0])
 });
 
-export type SearchSchemaInput = z.infer<typeof SearchSchema>;
+export type SearchSchemaInput = z.input<typeof SearchSchema>;
 
 export type SearchResponse = Partial<{
   ErrorDescription: string;
