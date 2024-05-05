@@ -1,5 +1,11 @@
 import AzulRequester from '../request';
-import { ProcessPaymentResponse, ProcessPaymentSchemaInput, ProcessPaymentSchema } from './schemas';
+import {
+  ProcessPaymentResponse,
+  ProcessPaymentSchemaInput,
+  ProcessPaymentSchema,
+  RefundSchemaInput,
+  RefundSchema
+} from './schemas';
 
 enum ProcessPaymentTransaction {
   SALE = 'Sale',
@@ -47,9 +53,9 @@ class ProcessPayment {
    * El límite de tiempo para procesar una devolución es de 6 meses transcurridos
    * después de la transacción original.
    */
-  async refund(input: ProcessPaymentSchemaInput): Promise<ProcessPaymentResponse> {
+  async refund(input: RefundSchemaInput): Promise<ProcessPaymentResponse> {
     return await this.requester.safeRequest({
-      ...ProcessPaymentSchema.parse(input),
+      ...RefundSchema.parse(input),
       trxType: ProcessPaymentTransaction.REFUND
     });
   }

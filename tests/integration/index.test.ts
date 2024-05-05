@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto';
-import AzulAPI from '../azul-api/api';
+import AzulAPI from '../../src/azul-api/api';
 import 'dotenv/config';
 
 const azul = new AzulAPI({
@@ -31,9 +31,9 @@ test('Can verify a payment', async () => {
     cardNumber: '6011000990099818',
     expiration: '202412',
     CVC: '818',
-    customOrderId,
     amount: 100,
-    ITBIS: 10
+    ITBIS: 10,
+    customOrderId
   });
 
   expect(payment).toBeDefined();

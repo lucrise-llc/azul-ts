@@ -1,5 +1,5 @@
 import express from 'express';
-import AzulPage from '../azul-page';
+import AzulPage from '../src/azul-page';
 
 const app = express();
 
