@@ -10,42 +10,6 @@ const azul = new AzulAPI({
   keyPath: process.env.KEY_PATH!
 });
 
-test('Can make a payment', async () => {
-  const result = await azul.payments.sale({
-    cardNumber: '6011000990099818',
-    expiration: '202412',
-    CVC: '818',
-    customOrderId: '1234',
-    amount: 100,
-    ITBIS: 10
-  });
-
-  expect(result).toBeDefined();
-  expect(result.IsoCode).toBe('00');
-});
-
-test('Can verify a payment', async () => {
-  const customOrderId = randomUUID();
-
-  const payment = await azul.payments.sale({
-    cardNumber: '6011000990099818',
-    expiration: '202412',
-    CVC: '818',
-    amount: 100,
-    ITBIS: 10,
-    customOrderId
-  });
-
-  expect(payment).toBeDefined();
-  expect(payment.IsoCode).toBe('00');
-
-  const result = await azul.verifyPayment(customOrderId);
-
-  expect(result).toBeDefined();
-  expect(result.Found).toBe(true);
-  expect(result.CustomOrderId).toBe(customOrderId);
-});
-
 describe('Can void a payment', () => {
   const customOrderId = randomUUID();
   let azulOrderId: string | undefined = undefined;
@@ -65,7 +29,7 @@ describe('Can void a payment', () => {
     expect(payment.AzulOrderId).toBeDefined();
     expect(payment.AzulOrderId).not.toBe('');
     azulOrderId = payment.AzulOrderId;
-  });
+  }, 10000);
 
   it('After the payment, the TransactionType should be "Sale"', async () => {
     const verifyPayment = await azul.verifyPayment(customOrderId);

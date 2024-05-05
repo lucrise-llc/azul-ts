@@ -4,14 +4,12 @@ on:
     paths:
       - 'src/**'
       - 'tests/**'
+      - '.github/workflows/test.yaml'
 
 jobs:
   run-integration-tests:
     name: Run integration tests
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./frontend
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -19,8 +17,8 @@ jobs:
           node-version: "lts/*"
       - name: Write key and certificate to files
         run: |
-          echo "${{ secrets.AZUL_KEY }}" > ${HOME}/key.pem
-          echo "${{ secrets.AZUL_CERT }}" > ${HOME}/cert.pem
+          echo -n "${{ secrets.AZUL_KEY }}" | base64 --decode > ${HOME}/key.pem
+          echo -n "${{ secrets.AZUL_CERT }}" | base64 --decode > ${HOME}/cert.pem
       - run: npm ci
       - run: npm run test
       - name: Remove key and certificate
