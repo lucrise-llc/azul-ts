@@ -1,4 +1,5 @@
 import AzulAPI from '../../src/azul-api/api';
+import { describe, expect, it } from 'vitest';
 import 'dotenv/config';
 
 const azul = new AzulAPI({

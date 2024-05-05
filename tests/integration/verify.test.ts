@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto';
 import AzulAPI from '../../src/azul-api/api';
+import { describe, expect, it, beforeAll } from 'vitest';
 import 'dotenv/config';
 
 const azul = new AzulAPI({

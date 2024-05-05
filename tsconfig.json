@@ -27,6 +27,6 @@
     /* Output */
     "outDir": "dist"
   },
-  "include": ["src/**/*", "test"],
+  "include": ["src/**/*", "tests/**/*"],
   "exclude": ["node_modules", "**/__tests__/*"]
 }
