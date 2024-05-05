@@ -1,7 +1,6 @@
 import { randomUUID } from 'crypto';
 import AzulAPI from '../../src/azul-api/api';
 import 'dotenv/config';
-import { describe } from 'node:test';
 
 const azul = new AzulAPI({
   auth1: process.env.AUTH1!,
