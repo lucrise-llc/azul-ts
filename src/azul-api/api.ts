@@ -49,7 +49,7 @@ class AzulAPI {
    * Método VerifyPayment
    * Este método permite verificar la respuesta enviada por el webservice de una
    * transacción anterior (procesada por el método ProccesPayment) identificada por el
-   * campo CustomOrderId.
+   * campo CustomOrderId
    * Si existe más de una transacción con este identificador este método devolverá los
    * valores de la última transacción (más reciente) de ellas.
    */
