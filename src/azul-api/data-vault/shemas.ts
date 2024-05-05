@@ -36,7 +36,7 @@ export const Create = z.object({
 
 export type DataVaultResponse = Partial<{
   /**
-   * Marca de la tarjeta.
+   * Marca de la tarjeta
    */
   Brand: string;
   /**
