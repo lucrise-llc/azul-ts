@@ -41,5 +41,5 @@ describe('Can post a payment', () => {
     expect(verify).toBeDefined();
     expect(verify.Found).toBe(true);
     expect(verify.TransactionType).toBe('Post');
-  }, 10000);
+  }, 60000);
 });

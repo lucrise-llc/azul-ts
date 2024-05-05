@@ -29,7 +29,7 @@ describe('Can hold a payment', () => {
     expect(result.IsoCode).toBe('00');
     expect(result.AzulOrderId).toBeDefined();
     azulOrderId = result.AzulOrderId!;
-  }, 10000);
+  }, 60000);
 
   it('The transaction type is hold', async () => {
     const result = await azul.verifyPayment(customOrderId);
@@ -37,7 +37,7 @@ describe('Can hold a payment', () => {
     expect(result).toBeDefined();
     expect(result.Found).toBe(true);
     expect(result.TransactionType).toBe('Hold');
-  }, 10000);
+  }, 60000);
 
   it('Can void a hold', async () => {
     const result = await azul.void(azulOrderId);
@@ -49,5 +49,5 @@ describe('Can hold a payment', () => {
     expect(verify).toBeDefined();
     expect(verify.Found).toBe(true);
     expect(verify.TransactionType).toBe('Void');
-  }, 10000);
+  }, 60000);
 });

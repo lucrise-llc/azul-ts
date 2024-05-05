@@ -30,7 +30,7 @@ describe('Can void a payment', () => {
     expect(payment.AzulOrderId).toBeDefined();
     expect(payment.AzulOrderId).not.toBe('');
     azulOrderId = payment.AzulOrderId;
-  }, 10000);
+  }, 60000);
 
   it('After the payment, the TransactionType should be "Sale"', async () => {
     const verifyPayment = await azul.verifyPayment(customOrderId);
@@ -38,7 +38,7 @@ describe('Can void a payment', () => {
     expect(verifyPayment.Found).toBe(true);
     expect(verifyPayment.CustomOrderId).toBe(customOrderId);
     expect(verifyPayment.TransactionType).toBe('Sale');
-  }, 10000);
+  }, 60000);
 
   it("After voiding the payment, the TransactionType should be 'Void'", async () => {
     const voidResponse = await azul.void(azulOrderId!);
@@ -50,5 +50,5 @@ describe('Can void a payment', () => {
     expect(verifyPayment.Found).toBe(true);
     expect(verifyPayment.CustomOrderId).toBe(customOrderId);
     expect(verifyPayment.TransactionType).toBe('Void');
-  }, 10000);
+  }, 60000);
 });

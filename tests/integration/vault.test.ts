@@ -24,7 +24,7 @@ describe('DataVault', () => {
     expect(result.IsoCode).toBe('00');
     expect(result.DataVaultToken).toBeDefined();
     dataVaultToken = result.DataVaultToken!;
-  }, 10000);
+  }, 60000);
 
   it('Can make a payment with a DataVault token', async () => {
     const result = await azul.valut.sale({
@@ -35,14 +35,14 @@ describe('DataVault', () => {
 
     expect(result).toBeDefined();
     expect(result.IsoCode).toBe('00');
-  }, 10000);
+  }, 60000);
 
   it('Can delete a DataVault token', async () => {
     const result = await azul.valut.delete(dataVaultToken);
 
     expect(result).toBeDefined();
     expect(result.IsoCode).toBe('00');
-  }, 10000);
+  }, 60000);
 
   it('After deleting a DataVault token, it should not be possible to make a payment with it', async () => {
     const result = await azul.valut.sale({
@@ -53,5 +53,5 @@ describe('DataVault', () => {
 
     expect(result).toBeDefined();
     expect(result.IsoCode).not.toBe('00');
-  }, 10000);
+  }, 60000);
 });

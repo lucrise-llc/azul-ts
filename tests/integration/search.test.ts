@@ -26,7 +26,7 @@ describe('Can search a payment', () => {
 
     expect(result).toBeDefined();
     expect(result.IsoCode).toBe('00');
-  }, 10000);
+  }, 60000);
 
   it('Can search a payment', async () => {
     const result = await azul.search({
@@ -40,5 +40,5 @@ describe('Can search a payment', () => {
 
     const transaction = result.Transactions?.find((t) => t.CustomOrderId === customOrderId);
     expect(transaction).toBeDefined();
-  }, 10000);
+  }, 60000);
 });

@@ -44,7 +44,7 @@ describe('Can refund a payment', () => {
     expect(verify).toBeDefined();
     expect(verify.Found).toBe(true);
     expect(verify.TransactionType).toBe('Refund');
-  }, 10000);
+  }, 60000);
 
   it('Can refund a post', async () => {
     const customOrderId = randomUUID();
@@ -87,5 +87,5 @@ describe('Can refund a payment', () => {
     expect(verify).toBeDefined();
     expect(verify.Found).toBe(true);
     expect(verify.TransactionType).toBe('Refund');
-  }, 10000);
+  }, 60000);
 });

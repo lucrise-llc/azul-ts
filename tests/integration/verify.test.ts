@@ -26,7 +26,7 @@ describe('Can verify a payment', () => {
 
     expect(payment).toBeDefined();
     expect(payment.IsoCode).toBe('00');
-  }, 10000);
+  }, 60000);
 
   it('After the payment, the TransactionType should be "Sale"', async () => {
     const result = await azul.verifyPayment(customOrderId);
@@ -35,5 +35,5 @@ describe('Can verify a payment', () => {
     expect(result.Found).toBe(true);
     expect(result.CustomOrderId).toBe(customOrderId);
     expect(result.TransactionType).toBe('Sale');
-  }, 10000);
+  }, 60000);
 });

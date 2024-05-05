@@ -23,5 +23,5 @@ describe('Can make a payment', () => {
 
     expect(result).toBeDefined();
     expect(result.IsoCode).toBe('00');
-  }, 10000);
+  }, 60000);
 });
