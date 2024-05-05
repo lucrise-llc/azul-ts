@@ -28,7 +28,6 @@
   "license": "ISC",
   "description": "SDK for Azul",
   "devDependencies": {
-    "@semantic-release/git": "^10.0.1",
     "@semantic-release/release-notes-generator": "^13.0.0",
     "@types/express": "^4.17.21",
     "@types/node": "^20.12.8",
@@ -103,16 +102,6 @@
               "scope"
             ]
           }
-        }
-      ],
-      [
-        "@semantic-release/git",
-        {
-          "assets": [
-            "package.json",
-            "dist/**"
-          ],
-          "message": "chore(release): set `package.json` to ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
         }
       ]
     ]
