@@ -146,4 +146,4 @@ Unlike the Payment Page, the API does not require a redirection or any sort of f
 
 **NOTE: It is heavily recomended to set the `timeout` for this request to at least 120 seconds.**
 
-For more examples, please take a look at our tests [tests](./src/tests) and [examples](./src/examples).
+For more examples, please take a look at our [tests](./src/tests) and [examples](./src/examples).
