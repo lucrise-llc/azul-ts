@@ -20,6 +20,7 @@
   "license": "ISC",
   "description": "SDK for Azul",
   "devDependencies": {
+    "@semantic-release/release-notes-generator": "^13.0.0",
     "@types/express": "^4.17.21",
     "@types/jest": "^29.5.12",
     "@types/node": "^20.12.8",
@@ -52,6 +53,8 @@
       "main"
     ],
     "plugins": [
+      "@semantic-release/github",
+      "@semantic-release/npm",
       [
         "@semantic-release/commit-analyzer",
         {
@@ -70,8 +73,25 @@
           }
         }
       ],
-      "@semantic-release/github",
-      "@semantic-release/npm"
+      [
+        "@semantic-release/release-notes-generator",
+        {
+          "preset": "angular",
+          "parserOpts": {
+            "noteKeywords": [
+              "BREAKING CHANGE",
+              "BREAKING CHANGES",
+              "BREAKING"
+            ]
+          },
+          "writerOpts": {
+            "commitsSort": [
+              "subject",
+              "scope"
+            ]
+          }
+        }
+      ]
     ]
   }
 }
