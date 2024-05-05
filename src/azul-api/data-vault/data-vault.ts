@@ -1,6 +1,14 @@
+import { ProcessPaymentTransaction } from '../process-payment/process-payment ';
+import { ProcessPaymentResponse } from '../process-payment/schemas';
 import { Process } from '../processes';
 import AzulRequester from '../request';
-import { Create, CreateInput, Delete, DeleteInput, DataVaultResponse } from './shemas';
+import {
+  Create,
+  CreateInput,
+  DataVaultResponse,
+  DataVaultSaleInput,
+  DataVaultSaleSchema
+} from './shemas';
 
 enum DataVaultTransaction {
   CREATE = 'CREATE',
@@ -33,14 +41,27 @@ class DataVault {
    * ### Delete: Eliminación de Token de Bóveda de Datos (DataVault)
    * Con esta transacción se solicita la eliminación de un token de la Bóveda de Datos.
    */
-  async delete(input: DeleteInput): Promise<DataVaultResponse> {
+  async delete(dataVaultToken: string): Promise<DataVaultResponse> {
     return await this.requester.safeRequest(
       {
-        ...Delete.parse(input),
+        dataVaultToken,
         trxType: DataVaultTransaction.DELETE
       },
       Process.Datavault
     );
+  }
+
+  /**
+   * ### Sale: Transacción de Venta
+   * Te permite realizar una transacción de venta con un token generado por la transacción
+   * de DataVault.
+   */
+  async sale(input: DataVaultSaleInput): Promise<ProcessPaymentResponse> {
+    return await this.requester.safeRequest({
+      ...DataVaultSaleSchema.parse(input),
+      expiration: '',
+      trxType: ProcessPaymentTransaction.SALE
+    });
   }
 }
 

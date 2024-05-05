@@ -7,7 +7,7 @@ import {
   RefundSchema
 } from './schemas';
 
-enum ProcessPaymentTransaction {
+export enum ProcessPaymentTransaction {
   SALE = 'Sale',
   HOLD = 'Hold',
   REFUND = 'Refund'
