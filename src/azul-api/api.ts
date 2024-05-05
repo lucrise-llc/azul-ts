@@ -53,7 +53,11 @@ class AzulAPI {
    * Si existe más de una transacción con este identificador este método devolverá los
    * valores de la última transacción (más reciente) de ellas.
    */
-  async verifyPayment(customOrderId: string): Promise<ProcessPaymentResponse> {
+  async verifyPayment(customOrderId: string): Promise<
+    ProcessPaymentResponse & {
+      Found?: boolean;
+    }
+  > {
     return await this.requester.safeRequest({ customOrderId }, Process.VerifyPayment);
   }
 
