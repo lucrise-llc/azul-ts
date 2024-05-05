@@ -20,8 +20,8 @@ jobs:
           AZUL_KEY: ${{ secrets.AZUL_KEY }}
           AZUL_CERT: ${{ secrets.AZUL_CERT }}
         run: |
-          echo -n "$AZUL_KEY" | base64 --decode > ${HOME}/key.pem
-          echo -n "$AZUL_CERT" | base64 --decode > ${HOME}/cert.pem
+          echo "${AZUL_KEY// /}" | base64 --decode > ${HOME}/key.pem
+          echo "${AZUL_CERT// /}" | base64 --decode > ${HOME}/cert.pem
       - run: npm ci
       - run: npm run test
       - name: Remove key and certificate
