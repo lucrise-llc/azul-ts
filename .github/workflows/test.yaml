@@ -20,8 +20,8 @@ jobs:
           AZUL_KEY: ${{ secrets.AZUL_KEY }}
           AZUL_CERT: ${{ secrets.AZUL_CERT }}
         run: |
-          echo "${AZUL_KEY}" | fold -w 4 | sed '$ d' | tr -d '\n' | base64 --decode > ${HOME}/test.key
-          echo "${AZUL_CERT}" | fold -w 4 | sed '$ d' | tr -d '\n' | base64 --decode > ${HOME}/test.crt
+          echo "${AZUL_KEY}" | base64 --decode > ${HOME}/test.key
+          echo "${AZUL_CERT}" | base64 --decode > ${HOME}/test.crt
       - run: npm ci
       - name: Run tests
         env:
