@@ -18,7 +18,7 @@ export const PaymentRequesSchema = z
     customField2Value: z.string().default('').optional(),
     showTransactionResult: z.enum(['1', '0']).default('1').optional(),
     locale: z.enum(['ES', 'EN']).default('ES').optional(),
-    saveToDataVault: z.enum(['1', '0']).default('0').optional(),
+    saveToDataVault: z.enum(['1', '2']).default('2').optional(),
     dataVaultToken: z.string().optional(),
     altMerchantName: z
       .string()
@@ -81,7 +81,7 @@ type AzulPageConfig = {
 };
 
 class AzulPage {
-  private config: AzulPageConfig;
+  private readonly config: AzulPageConfig;
   private azulURL: string;
 
   constructor(config: AzulPageConfig) {
