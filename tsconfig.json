@@ -11,9 +11,11 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "esModuleInterop": true,
+
+    /* Types */
     "declaration": true,
-    "sourceMap": true,
     "declarationMap": true,
+    "sourceMap": true,
 
     /* Linting */
     "strict": true,

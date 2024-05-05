@@ -14,7 +14,7 @@
   "scripts": {
     "prepare": "husky install",
     "test": "npx jest --verbose",
-    "build": "tsc",
+    "build": "rm -rf dist && tsc && cp package.json dist/package.json",
     "start": "npm run build && node dist/index.js"
   },
   "keywords": [
@@ -98,6 +98,13 @@
               "scope"
             ]
           }
+        }
+      ],
+      [
+        "@semantic-release/git",
+        {
+          "assets": ["dist/**"],
+          "message": "chore(release): set `package.json` to ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
         }
       ]
     ]
