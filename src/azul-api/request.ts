@@ -67,14 +67,12 @@ class AzulRequester {
         Auth2: this.auth2,
         'Content-Type': 'application/json'
       },
-      dispatcher: new Agent(
-        {
-          connect: {
-            cert,
-            key
-          }
+      dispatcher: new Agent({
+        connect: {
+          cert,
+          key
         }
-      ),
+      }),
       body: JSON.stringify(
         capitalizeKeys({
           channel: this.channel,
@@ -84,7 +82,7 @@ class AzulRequester {
       )
     });
 
-    return await response.body.json();
+    return (await response.body.json()) as any;
   }
 
   private async getCertificates(): Promise<{ cert: Buffer; key: Buffer }> {
