@@ -15,13 +15,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "lts/*"
+      - name: Base64 Version
+        run: base64 --version
       - name: Write key and certificate to files
         env:
           AZUL_KEY: ${{ secrets.AZUL_KEY }}
           AZUL_CERT: ${{ secrets.AZUL_CERT }}
         run: |
-          echo "${AZUL_KEY}" | base64 --decode > ${HOME}/key.pem
-          echo "${AZUL_CERT}" | base64 --decode > ${HOME}/cert.pem
+          echo "${AZUL_KEY}" | tr -d '\n' | base64 --decode > ${HOME}/key.pem
+          echo "${AZUL_CERT}" | tr -d '\n' | base64 --decode > ${HOME}/cert.pem
       - run: npm ci
       - run: npm run test
       - name: Remove key and certificate
