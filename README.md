@@ -42,16 +42,15 @@ const azul = new AzulPage({
   merchantId: process.env.MERCHANT_ID!,
   authKey: process.env.AUTH_KEY!,
   merchantName: 'RapidoTickets',
-  merchantType: 'Ecommerce',
-  environment: 'dev'
+  merchantType: 'Ecommerce'
 });
 ```
 
-The `merchantId` is the merchant ID provided by Azul.
-The `authKey` is the authentication key provided by Azul.
-The `merchantName` is the name of the merchant.
-The `merchantType` is the type of merchant (e.g. Ecommerce, Retail, etc.).
-The `environment` is the environment in which the merchant is operating (e.g. dev, prod, etc.).
+The `merchantId` is the merchant ID provided by Azul.<br/>
+The `authKey` is the authentication key provided by Azul.<br/>
+The `merchantName` is the name of the merchant.<br/>
+The `merchantType` is the type of merchant (e.g. Ecommerce, Retail, etc.).<br/>
+The `environment` is the environment in which the merchant is operating (e.g. dev, prod, etc.).<br/>
 
 Then, you can create a form that will redirect the user to the Azul Payment Page.
 
@@ -112,10 +111,10 @@ const azul = new AzulAPI({
 });
 ```
 
-The `auth1` and `auth2` are the authentication credentials provided by Azul.
-The `merchantId` is the merchant ID provided by Azul.
-The `certificatePath` is the path to the certificate sent to youby Azul.
-The `keyPath` is the path to the private key that generated the CSR file you sent to Azul in order to obtain the certificate.
+The `auth1` and `auth2` are the authentication credentials provided by Azul.<br/>
+The `merchantId` is the merchant ID provided by Azul.<br/>
+The `certificatePath` is the path to the certificate sent to youby Azul.<br/>
+The `keyPath` is the path to the private key that generated the CSR file you sent to Azul in order to obtain the certificate.<br/>
 
 Then, you can use the `AzulAPI` class to make requests to the Azul API.
 
