@@ -1,4 +1,10 @@
-import { PostSchema, PostSchemaInput, SearchSchema, SearchSchemaInput } from './schemas';
+import {
+  PostSchema,
+  PostSchemaInput,
+  SearchResponse,
+  SearchSchema,
+  SearchSchemaInput
+} from './schemas';
 import AzulRequester, { Config } from './request';
 import DataVault from './data-vault/data-vault';
 import ProcessPayment from './process-payment/process-payment ';
@@ -56,7 +62,7 @@ class AzulAPI {
    * vía Webservices, anteriormente procesadas de un rango de fechas
    * previamente seleccionado.
    */
-  async search(input: SearchSchemaInput): Promise<ProcessPaymentResponse> {
+  async search(input: SearchSchemaInput): Promise<SearchResponse> {
     return await this.requester.safeRequest(SearchSchema.parse(input), Process.SearchPayments);
   }
 }

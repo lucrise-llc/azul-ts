@@ -54,6 +54,8 @@ export const PostSchema = z.object({
   ITBIS
 });
 
+export type PostSchemaInput = z.infer<typeof PostSchema>;
+
 export const SearchSchema = z.object({
   // YYYY-MM-DD
   dateFrom: z
@@ -68,4 +70,27 @@ export const SearchSchema = z.object({
 });
 
 export type SearchSchemaInput = z.infer<typeof SearchSchema>;
-export type PostSchemaInput = z.infer<typeof PostSchema>;
+
+export type SearchResponse = Partial<{
+  ErrorDescription: string;
+  ResponseCode: string;
+  Transactions: Partial<{
+    Amount: string;
+    AuthorizationCode: string;
+    AzulOrderId: string;
+    CardNumber: string;
+    CurrencyPosCode: string;
+    CustomOrderId: string;
+    DateTime: string;
+    ErrorDescription: string;
+    Found: boolean;
+    IsoCode: string;
+    Itbis: string;
+    LotNumber: string;
+    OrderNumber: string;
+    RRN: string;
+    ResponseCode: string;
+    Ticket: string;
+    TransactionType: string;
+  }>[];
+}>;
