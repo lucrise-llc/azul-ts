@@ -15,17 +15,23 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "lts/*"
-      - name: Base64 Version
-        run: base64 --version
       - name: Write key and certificate to files
         env:
           AZUL_KEY: ${{ secrets.AZUL_KEY }}
           AZUL_CERT: ${{ secrets.AZUL_CERT }}
         run: |
-          echo "${AZUL_KEY}" | tr -d '\n' | base64 --decode > ${HOME}/key.pem
-          echo "${AZUL_CERT}" | tr -d '\n' | base64 --decode > ${HOME}/cert.pem
+          echo "${AZUL_KEY}" | fold -w 4 | sed '$ d' | tr -d '\n' | base64 --decode > ${HOME}/key.pem
+          echo "${AZUL_CERT}" | fold -w 4 | sed '$ d' | tr -d '\n' | base64 --decode > ${HOME}/cert.pem
       - run: npm ci
-      - run: npm run test
+      - name: Run Jest
+        run: |
+          export CERTIFICATE_PATH=${HOME}/cert.pem
+          export KEY_PATH=${HOME}/key.pem
+          npm run test
+        env:
+          AUTH1: ${{ secrets.AUTH1 }}
+          AUTH2: ${{ secrets.AUTH2 }}
+          MERCHANT_ID: ${{ secrets.MERCHANT_ID }}
       - name: Remove key and certificate
         run: |
           rm ${HOME}/key.pem
