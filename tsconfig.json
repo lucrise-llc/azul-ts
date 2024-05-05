@@ -11,6 +11,9 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "esModuleInterop": true,
+    "declaration": true,
+    "sourceMap": true,
+    "declarationMap": true,
 
     /* Linting */
     "strict": true,
@@ -20,7 +23,7 @@
     "forceConsistentCasingInFileNames": true,
 
     /* Output */
-    "outDir": "dist",
+    "outDir": "dist"
   },
   "include": ["src/**/*", "test"],
   "exclude": ["node_modules", "**/__tests__/*"]
