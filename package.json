@@ -42,6 +42,7 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
+    "@semantic-release/git": "^10.0.1",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "undici": "^6.15.0",
@@ -103,7 +104,9 @@
       [
         "@semantic-release/git",
         {
-          "assets": ["dist/**"],
+          "assets": [
+            "dist/**"
+          ],
           "message": "chore(release): set `package.json` to ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
         }
       ]
