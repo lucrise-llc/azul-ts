@@ -1,7 +1,6 @@
 import path from 'path';
-import https from 'https';
 import fs from 'fs/promises';
-import fetch from 'node-fetch';
+import { request, Agent } from 'undici';
 import { capitalizeKeys } from '../utils';
 import { Process } from './processes';
 
@@ -59,14 +58,23 @@ class AzulRequester {
       url = url + '?' + process;
     }
 
-    const response = await fetch(url, {
+    const { cert, key } = await this.getCertificates();
+
+    const response = await request(url, {
       method: 'POST',
       headers: {
         Auth1: this.auth1,
         Auth2: this.auth2,
         'Content-Type': 'application/json'
       },
-      agent: new https.Agent(await this.getCertificates()),
+      dispatcher: new Agent(
+        {
+          connect: {
+            cert,
+            key
+          }
+        }
+      ),
       body: JSON.stringify(
         capitalizeKeys({
           channel: this.channel,
@@ -76,7 +84,7 @@ class AzulRequester {
       )
     });
 
-    return await response.json();
+    return await response.body.json();
   }
 
   private async getCertificates(): Promise<{ cert: Buffer; key: Buffer }> {
