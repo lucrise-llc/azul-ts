@@ -16,9 +16,12 @@ jobs:
         with:
           node-version: "lts/*"
       - name: Write key and certificate to files
+        env:
+          AZUL_KEY: ${{ secrets.AZUL_KEY }}
+          AZUL_CERT: ${{ secrets.AZUL_CERT }}
         run: |
-          echo -n "${{ secrets.AZUL_KEY }}" | base64 --decode > ${HOME}/key.pem
-          echo -n "${{ secrets.AZUL_CERT }}" | base64 --decode > ${HOME}/cert.pem
+          echo -n "$AZUL_KEY" | base64 --decode > ${HOME}/key.pem
+          echo -n "$AZUL_CERT" | base64 --decode > ${HOME}/cert.pem
       - run: npm ci
       - run: npm run test
       - name: Remove key and certificate
