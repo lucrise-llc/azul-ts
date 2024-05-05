@@ -56,6 +56,7 @@ class AzulAPI {
   async verifyPayment(customOrderId: string): Promise<
     ProcessPaymentResponse & {
       Found?: boolean;
+      TransactionType?: string;
     }
   > {
     return await this.requester.safeRequest({ customOrderId }, Process.VerifyPayment);
