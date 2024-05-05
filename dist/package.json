@@ -1,0 +1,120 @@
+{
+  "name": "@lucrise/azul-ts",
+  "version": "1.2.2",
+  "type": "module",
+  "main": "./dist/index.umd.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.umd.cjs"
+    }
+  },
+  "scripts": {
+    "prepare": "husky install",
+    "test": "vitest run",
+    "build": "rm -rf dist && tsc && cp package.json dist/package.json",
+    "start": "npm run build && node dist/index.js"
+  },
+  "keywords": [
+    "azul",
+    "payment",
+    "sdk",
+    "visa",
+    "mastercard"
+  ],
+  "author": "Lucrise",
+  "license": "ISC",
+  "description": "SDK for Azul",
+  "devDependencies": {
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/release-notes-generator": "^13.0.0",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.12.8",
+    "@types/node-fetch": "^2.6.11",
+    "@vitest/coverage-v8": "^1.6.0",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.2",
+    "prettier": "3.2.5",
+    "semantic-release": "^23.0.8",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "undici": "^6.15.0",
+    "zod": "^3.23.5"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write"
+    ],
+    "*.{html,css,less,ejs}": [
+      "prettier --write"
+    ],
+    "*.{js,css,md}": "prettier --write"
+  },
+  "release": {
+    "branches": [
+      "main"
+    ],
+    "plugins": [
+      "@semantic-release/github",
+      [
+        "@semantic-release/npm",
+        {
+          "pkgRoot": "./dist"
+        }
+      ],
+      [
+        "@semantic-release/commit-analyzer",
+        {
+          "preset": "angular",
+          "releaseRules": [
+            {
+              "type": "refactor",
+              "release": "patch"
+            }
+          ],
+          "parserOpts": {
+            "noteKeywords": [
+              "BREAKING CHANGE",
+              "BREAKING CHANGES"
+            ]
+          }
+        }
+      ],
+      [
+        "@semantic-release/release-notes-generator",
+        {
+          "preset": "angular",
+          "parserOpts": {
+            "noteKeywords": [
+              "BREAKING CHANGE",
+              "BREAKING CHANGES",
+              "BREAKING"
+            ]
+          },
+          "writerOpts": {
+            "commitsSort": [
+              "subject",
+              "scope"
+            ]
+          }
+        }
+      ],
+      [
+        "@semantic-release/git",
+        {
+          "assets": [
+            "package.json",
+            "dist/**"
+          ],
+          "message": "chore(release): set `package.json` to ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+        }
+      ]
+    ]
+  }
+}
