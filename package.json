@@ -9,18 +9,27 @@
     "build": "tsc",
     "start": "npm run build && node dist/index.js"
   },
-  "keywords": ["azul", "payment", "sdk", "visa", "mastercard"],
+  "keywords": [
+    "azul",
+    "payment",
+    "sdk",
+    "visa",
+    "mastercard"
+  ],
   "author": "Lucrise",
   "license": "ISC",
   "description": "SDK for Azul",
   "devDependencies": {
     "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.12",
     "@types/node": "^20.12.8",
+    "@types/node-fetch": "^2.6.11",
     "husky": "^9.0.11",
+    "jest": "^29.7.0",
     "lint-staged": "^15.2.2",
     "prettier": "3.2.5",
     "semantic-release": "^23.0.8",
-    "@types/node-fetch": "^2.6.11",
+    "ts-jest": "^29.1.2",
     "typescript": "^5.4.5"
   },
   "dependencies": {
@@ -39,6 +48,8 @@
     "*.{js,css,md}": "prettier --write"
   },
   "release": {
-    "branches": ["main"]
+    "branches": [
+      "main"
+    ]
   }
 }
