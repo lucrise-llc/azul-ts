@@ -20,19 +20,19 @@ jobs:
           AZUL_KEY: ${{ secrets.AZUL_KEY }}
           AZUL_CERT: ${{ secrets.AZUL_CERT }}
         run: |
-          echo "${AZUL_KEY}" | fold -w 4 | sed '$ d' | tr -d '\n' | base64 --decode > ${HOME}/key.pem
-          echo "${AZUL_CERT}" | fold -w 4 | sed '$ d' | tr -d '\n' | base64 --decode > ${HOME}/cert.pem
+          echo "${AZUL_KEY}" | fold -w 4 | sed '$ d' | tr -d '\n' | base64 --decode > ${HOME}/test.key
+          echo "${AZUL_CERT}" | fold -w 4 | sed '$ d' | tr -d '\n' | base64 --decode > ${HOME}/test.crt
       - run: npm ci
       - name: Run Jest
-        run: |
-          export CERTIFICATE_PATH=${HOME}/cert.pem
-          export KEY_PATH=${HOME}/key.pem
-          npm run test
         env:
           AUTH1: ${{ secrets.AUTH1 }}
           AUTH2: ${{ secrets.AUTH2 }}
           MERCHANT_ID: ${{ secrets.MERCHANT_ID }}
+        run: |
+          export CERTIFICATE_PATH=${HOME}/test.crt
+          export KEY_PATH=${HOME}/test.key
+          npm run test
       - name: Remove key and certificate
         run: |
-          rm ${HOME}/key.pem
-          rm ${HOME}/cert.pem
+          rm ${HOME}/test.key
+          rm ${HOME}/test.crt
