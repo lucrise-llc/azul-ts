@@ -7,7 +7,7 @@ import {
 } from './schemas';
 import AzulRequester, { Config } from './request';
 import DataVault from './data-vault/data-vault';
-import ProcessPayment from './process-payment/process-payment ';
+import ProcessPayment from './process-payment/process-payment';
 import { ProcessPaymentResponse } from './process-payment/schemas';
 import { Process } from './processes';
 

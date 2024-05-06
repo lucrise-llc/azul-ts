@@ -1,4 +1,4 @@
-import { ProcessPaymentTransaction } from '../process-payment/process-payment ';
+import { ProcessPaymentTransaction } from '../process-payment/process-payment';
 import { ProcessPaymentResponse } from '../process-payment/schemas';
 import { Process } from '../processes';
 import AzulRequester from '../request';

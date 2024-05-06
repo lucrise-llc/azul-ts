@@ -28,6 +28,10 @@
     /* Output */
     "outDir": "dist"
   },
+  "tsc-alias": {
+    "verbose": false,
+    "resolveFullPaths": true,
+  },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "**/__tests__/*"]
 }
