@@ -12,7 +12,6 @@ import {
   customerServicePhone,
   dataVaultToken,
   expiration,
-  forceNo3DS,
   orderNumber,
   posInputMode,
   saveToDataVault
@@ -126,14 +125,7 @@ export const ProcessPaymentSchema = z.object({
    * valor en 1, SDP le devolverá el token generado en
    * el campo DataVaultToken
    */
-  saveToDataVault,
-  /**
-   * Valores posibles 0 =no, 1 = Si. Si se envía el valor en
-   * ‘0’, la transacción se procesa con 3D Secure. Si se
-   * envía el valor en ‘1’ la transacción se procesa sin
-   * 3D Secure.
-   */
-  forceNo3DS
+  saveToDataVault
 });
 
 export const RefundRequestSchema = z
@@ -316,13 +308,6 @@ export const RefundSchema = z.object({
    * el campo DataVaultToken
    */
   saveToDataVault,
-  /**
-   * Valores posibles 0 =no, 1 = Si. Si se envía el valor en
-   * ‘0’, la transacción se procesa con 3D Secure. Si se
-   * envía el valor en ‘1’ la transacción se procesa sin
-   * 3D Secure.
-   */
-  forceNo3DS,
   /**
    * Número de orden Azul. Puede ser usado en vez del RRN para generar una
    * devolución. Importante dar prioridad a este valor sobre el RRN.

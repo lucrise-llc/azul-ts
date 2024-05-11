@@ -9,7 +9,6 @@ import {
   customOrderId,
   customerServicePhone,
   expiration,
-  forceNo3DS,
   orderNumber,
   posInputMode
 } from '../schemas';
@@ -149,14 +148,7 @@ export const DataVaultSaleSchema = z.object({
    * depende de lo conversado con Negocios SDP. Si es
    * MOTO la transacción, no se debería enviar CVC.
    */
-  dataVaultToken: z.string().max(100),
-  /**
-   * Valores posibles 0 =no, 1 = Si. Si se envía el valor en
-   * ‘0’, la transacción se procesa con 3D Secure. Si se
-   * envía el valor en ‘1’ la transacción se procesa sin
-   * 3D Secure.
-   */
-  forceNo3DS
+  dataVaultToken: z.string().max(100)
 });
 
 export type DataVaultSaleInput = z.input<typeof DataVaultSaleSchema>;

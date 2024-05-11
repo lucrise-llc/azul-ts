@@ -10,17 +10,20 @@ import DataVault from './data-vault/data-vault';
 import ProcessPayment from './process-payment/process-payment';
 import { ProcessPaymentResponse } from './process-payment/schemas';
 import { Process } from './processes';
+import { Secure } from './secure/secure';
 
 class AzulAPI {
   private requester: AzulRequester;
 
   public valut: DataVault;
   public payments: ProcessPayment;
+  public secure: Secure;
 
   constructor(config: Config) {
     this.requester = new AzulRequester(config);
     this.valut = new DataVault(this.requester);
     this.payments = new ProcessPayment(this.requester);
+    this.secure = new Secure(this.requester);
   }
 
   /**

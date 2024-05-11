@@ -22,3 +22,9 @@ export function capitalizeKeys(obj: any): any {
 export type Prettify<T> = {
   [K in keyof T]: T[K];
 } & {};
+
+export function sleep(ms: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}

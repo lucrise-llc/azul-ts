@@ -3,5 +3,7 @@ export enum Process {
   Post = 'ProcessPost',
   Datavault = 'ProcessDatavault',
   VerifyPayment = 'VerifyPayment',
-  SearchPayments = 'SearchPayments'
+  SearchPayments = 'SearchPayments',
+  Process3DsMethod = 'ProcessThreedsMethod',
+  Process3DsChallenge = 'ProcessThreedsChallenge'
 }

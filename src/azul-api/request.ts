@@ -64,6 +64,12 @@ class AzulRequester {
 
     const { cert, key } = await this.getCertificates();
 
+    const requestBody = capitalizeKeys({
+      channel: this.channel,
+      store: this.merchantId,
+      ...body
+    });
+
     const response = await request(url, {
       method: 'POST',
       headers: {
@@ -77,13 +83,7 @@ class AzulRequester {
           key
         }
       }),
-      body: JSON.stringify(
-        capitalizeKeys({
-          channel: this.channel,
-          store: this.merchantId,
-          ...body
-        })
-      )
+      body: JSON.stringify(requestBody)
     });
 
     return (await response.body.json()) as any;
