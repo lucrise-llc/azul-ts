@@ -30,7 +30,7 @@ describe('Can search a payment', () => {
 
   it('Can search a payment', async () => {
     const result = await azul.search({
-      dateFrom: new Date(),
+      dateFrom: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7),
       dateTo: new Date()
     });
 
