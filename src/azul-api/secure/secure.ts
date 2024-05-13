@@ -6,9 +6,15 @@ import AzulRequester from '../request';
 import { BrowserInfo, CardHolderInfo, MethodNotificationStatus, ThreeDSAuth } from './types';
 import { sleep } from '../../utils';
 
+type SecurePaymentSession = {
+  azulOrderId: string;
+  termUrl: string;
+  methodNotificationUrl: string;
+};
+
 export class Secure {
   private readonly requester: AzulRequester;
-  private secureIdToAzulOrderId = new Map<string, string>();
+  private securePaymentSessions = new Map<string, SecurePaymentSession>();
 
   constructor(requester: AzulRequester) {
     this.requester = requester;
@@ -24,11 +30,13 @@ export class Secure {
     }
   ): Promise<
     | {
-        ok: true;
-        value: string;
+        redirect: true;
+        id: string;
+        html: string;
       }
     | {
-        ok: false;
+        redirect: false;
+        id: string;
         value: any;
       }
   > {
@@ -48,18 +56,27 @@ export class Secure {
     });
 
     if (result.ResponseMessage === '3D_SECURE_CHALLENGE') {
-      this.secureIdToAzulOrderId.set(secureId, result.AzulOrderId);
+      this.securePaymentSessions.set(secureId, {
+        azulOrderId: result.AzulOrderId,
+        termUrl: input.threeDSAuth.TermUrl,
+        methodNotificationUrl: input.threeDSAuth.MethodNotificationUrl
+      });
 
       return {
-        ok: true,
-        value: challengeResponse({
+        redirect: true,
+        id: secureId,
+        html: challengeResponse({
           termUrl: input.threeDSAuth.TermUrl,
           creq: result.ThreeDSChallenge.CReq,
           redirectPostUrl: result.ThreeDSChallenge.RedirectPostUrl
         })
       };
     } else if (result.ResponseMessage === '3D_SECURE_2_METHOD') {
-      this.secureIdToAzulOrderId.set(secureId, result.AzulOrderId);
+      this.securePaymentSessions.set(secureId, {
+        azulOrderId: result.AzulOrderId,
+        termUrl: input.threeDSAuth.TermUrl,
+        methodNotificationUrl: input.threeDSAuth.MethodNotificationUrl
+      });
 
       let form: string = result.ThreeDSMethod.MethodForm;
 
@@ -68,12 +85,14 @@ export class Secure {
       }
 
       return {
-        ok: true,
-        value: form
+        redirect: true,
+        id: secureId,
+        html: form
       };
     } else {
       return {
-        ok: false,
+        redirect: false,
+        id: secureId,
         value: result
       };
     }
@@ -103,7 +122,7 @@ export class Secure {
   }
 
   async post3DS(id: string, cRes: string) {
-    const azulOrderId = this.secureIdToAzulOrderId.get(id);
+    const azulOrderId = this.securePaymentSessions.get(id);
 
     if (typeof azulOrderId !== 'string') {
       throw new Error('Invalid ID');
@@ -115,22 +134,37 @@ export class Secure {
     });
   }
 
-  async capture3DS(id: string): Promise<string> {
-    if (!this.secureIdToAzulOrderId.has(id)) {
+  async capture3DS(id: string): Promise<
+    | {
+        redirect: true;
+        html: string;
+      }
+    | {
+        redirect: false;
+        value: any;
+      }
+  > {
+    if (!this.securePaymentSessions.has(id)) {
       throw new Error('Invalid ID');
     }
 
     const process3DResult = await this.get3DResult(id);
 
     if (process3DResult.ResponseMessage === '3D_SECURE_CHALLENGE') {
-      return challengeResponse({
-        creq: process3DResult.ThreeDSChallenge.CReq,
-        termUrl: 'http://localhost:3000/post-3ds?id=' + id,
-        redirectPostUrl: process3DResult.ThreeDSChallenge.RedirectPostUrl
-      });
+      return {
+        redirect: true,
+        html: challengeResponse({
+          creq: process3DResult.ThreeDSChallenge.CReq,
+          termUrl: this.securePaymentSessions.get(id)!.termUrl,
+          redirectPostUrl: process3DResult.ThreeDSChallenge.RedirectPostUrl
+        })
+      };
     }
 
-    return process3DResult;
+    return {
+      redirect: false,
+      value: process3DResult
+    };
   }
 
   private processResult = new Map<string, any>();
@@ -154,7 +188,7 @@ export class Secure {
     // Otherwise, start processing the result
     this.processLoading.set(id, true);
     const result = await this.process3DS({
-      azulOrderId: this.secureIdToAzulOrderId.get(id)!,
+      azulOrderId: this.securePaymentSessions.get(id)!.azulOrderId,
       methodNotificationStatus: MethodNotificationStatus.RECEIVED
     });
     this.processLoading.set(id, false);

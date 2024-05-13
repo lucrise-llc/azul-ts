@@ -108,8 +108,8 @@ app.get('/buy', async (req, res) => {
     }
   });
 
-  if (result.ok) {
-    res.send(result.value);
+  if (result.redirect) {
+    res.send(result.html);
   } else {
     if (result.value.IsoCode === '00') {
       res.send(result.value);
