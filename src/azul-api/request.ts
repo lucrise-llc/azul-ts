@@ -1,12 +1,6 @@
-import path from 'path';
-import fs from 'fs/promises';
 import { request, Agent } from 'undici';
 import { capitalizeKeys } from '../utils';
 import { Process } from './processes';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 enum AzulURL {
   DEV = 'https://pruebas.azul.com.do/webservices/JSON/Default.aspx',
@@ -17,8 +11,8 @@ export type Config = {
   auth1: string;
   auth2: string;
   merchantId: string;
-  certificatePath: string;
-  keyPath: string;
+  certificate: string;
+  key: string;
   environment?: 'dev' | 'prod';
   channel?: string;
 };
@@ -30,17 +24,15 @@ class AzulRequester {
   private auth2: string;
   private channel: string;
   private merchantId: string;
-  private certificatePath: string;
-  private keyPath: string;
-  private certificate: Buffer | undefined;
-  private certificateKey: Buffer | undefined;
+  private certificate: string;
+  private key: string;
 
   constructor(config: Config) {
     this.auth1 = config.auth1;
     this.auth2 = config.auth2;
     this.merchantId = config.merchantId;
-    this.certificatePath = config.certificatePath;
-    this.keyPath = config.keyPath;
+    this.certificate = config.certificate;
+    this.key = config.key;
 
     if (config.channel === undefined) {
       this.channel = 'EC';
@@ -89,20 +81,14 @@ class AzulRequester {
     return (await response.body.json()) as any;
   }
 
-  private async getCertificates(): Promise<{ cert: Buffer; key: Buffer }> {
-    if (this.certificate && this.certificateKey) {
-      return {
-        cert: this.certificate,
-        key: this.certificateKey
-      };
+  private async getCertificates(): Promise<{ cert: string; key: string }> {
+    if (!this.certificate || !this.key) {
+      throw new Error('Missing certificate or key');
     }
-
-    this.certificate = await fs.readFile(path.resolve(__dirname, this.certificatePath));
-    this.certificateKey = await fs.readFile(path.resolve(__dirname, this.keyPath));
 
     return {
       cert: this.certificate,
-      key: this.certificateKey
+      key: this.key
     };
   }
 }
