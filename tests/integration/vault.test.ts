@@ -1,14 +1,6 @@
-import AzulAPI from '../../src/azul-api/api';
+import { azul } from './instance';
 import { describe, expect, it } from 'vitest';
 import 'dotenv/config';
-
-const azul = new AzulAPI({
-  auth1: process.env.AUTH1!,
-  auth2: process.env.AUTH2!,
-  merchantId: process.env.MERCHANT_ID!,
-  certificatePath: process.env.CERTIFICATE_PATH!,
-  keyPath: process.env.KEY_PATH!
-});
 
 describe('DataVault', () => {
   let dataVaultToken: string;
