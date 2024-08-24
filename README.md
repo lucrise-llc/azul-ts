@@ -106,15 +106,15 @@ const azul = new AzulAPI({
   auth1: 'your-auth1',
   auth2: 'your-auth2',
   merchantId: 'your-merchant-id',
-  certificatePath: 'your-certificate-path',
-  keyPath: 'your-key-path'
+  certificate: 'your-certificate',
+  key: 'your-key'
 });
 ```
 
 The `auth1` and `auth2` are the authentication credentials provided by Azul.<br/>
 The `merchantId` is the merchant ID provided by Azul.<br/>
-The `certificatePath` is the path to the certificate sent to youby Azul.<br/>
-The `keyPath` is the path to the private key that generated the CSR file you sent to Azul in order to obtain the certificate.<br/>
+The `certificate` is the certificate sent to you by Azul.<br/>
+The `key` is the private key that generated the CSR file you sent to Azul in order to obtain the certificate.<br/>
 
 Then, you can use the `AzulAPI` class to make requests to the Azul API.
 
