@@ -122,14 +122,14 @@ export class Secure {
   }
 
   async post3DS(id: string, cRes: string) {
-    const azulOrderId = this.securePaymentSessions.get(id);
+    const session = this.securePaymentSessions.get(id);
 
-    if (typeof azulOrderId !== 'string') {
+    if (typeof session === 'undefined') {
       throw new Error('Invalid ID');
     }
 
     return await this.process3DsChallenge({
-      azulOrderId,
+      azulOrderId: session.azulOrderId,
       cRes
     });
   }
