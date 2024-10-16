@@ -37,8 +37,8 @@ const azul = new AzulAPI({
   auth1: process.env.AUTH1!,
   auth2: process.env.AUTH2!,
   merchantId: process.env.MERCHANT_ID!,
-  certificatePath: process.env.CERTIFICATE_PATH!,
-  keyPath: process.env.KEY_PATH!
+  certificate: process.env.AZUL_CERT!,
+  key: process.env.AZUL_KEY!
 });
 
 app.get('/', (req, res) => {
