@@ -1,3 +1,13 @@
+import type { ProcessPaymentSchemaInput } from '../process-payment/schemas';
+
+export type SecureSale = ProcessPaymentSchemaInput & {
+  cardHolderInfo: CardHolderInfo;
+  browserInfo: BrowserInfo;
+  threeDSAuth: ThreeDSAuth;
+} & {
+  useIframe?: boolean;
+};
+
 export enum ChallengeIndicator {
   /**
    * Sin preferencias (no tiene preferencia si se debe realizar un desafío.

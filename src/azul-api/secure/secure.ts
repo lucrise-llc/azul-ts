@@ -1,9 +1,9 @@
 import { randomUUID } from 'crypto';
 import { ProcessPaymentTransaction } from '../process-payment/process-payment';
-import { ProcessPaymentSchema, ProcessPaymentSchemaInput } from '../process-payment/schemas';
+import { ProcessPaymentSchema } from '../process-payment/schemas';
 import { Process } from '../processes';
 import AzulRequester from '../request';
-import { BrowserInfo, CardHolderInfo, MethodNotificationStatus, ThreeDSAuth } from './types';
+import { MethodNotificationStatus, SecureSale } from './types';
 import { sleep } from '../../utils';
 
 type SecurePaymentSession = {
@@ -20,15 +20,7 @@ export class Secure {
     this.requester = requester;
   }
 
-  async sale(
-    input: ProcessPaymentSchemaInput & {
-      cardHolderInfo: CardHolderInfo;
-      browserInfo: BrowserInfo;
-      threeDSAuth: ThreeDSAuth;
-    } & {
-      useIframe?: boolean;
-    }
-  ): Promise<
+  async sale(input: SecureSale): Promise<
     | {
         redirect: true;
         id: string;
