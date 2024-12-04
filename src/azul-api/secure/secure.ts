@@ -111,16 +111,6 @@ export class Secure {
     );
   }
 
-  async process3DsChallenge(input: { azulOrderId: string; cRes: string }) {
-    return await this.requester.safeRequest(
-      {
-        azulOrderId: input.azulOrderId,
-        cRes: input.cRes
-      },
-      Process.Process3DsChallenge
-    );
-  }
-
   async post3DS(id: string, cRes: string) {
     const session = this.securePaymentSessions.get(id);
 
@@ -132,6 +122,16 @@ export class Secure {
       azulOrderId: session.azulOrderId,
       cRes
     });
+  }
+
+  private async process3DsChallenge(input: { azulOrderId: string; cRes: string }) {
+    return await this.requester.safeRequest(
+      {
+        azulOrderId: input.azulOrderId,
+        cRes: input.cRes
+      },
+      Process.Process3DsChallenge
+    );
   }
 
   async capture3DS(id: string): Promise<
