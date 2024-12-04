@@ -8,7 +8,7 @@ import {
   DataVaultResponse,
   DataVaultSaleInput,
   DataVaultSaleSchema
-} from './shemas';
+} from './schemas';
 
 enum DataVaultTransaction {
   CREATE = 'CREATE',
