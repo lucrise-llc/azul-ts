@@ -68,7 +68,7 @@ export type DataVaultResponse = Partial<{
   /**
    * Mensaje de respuesta
    */
-  ReponseMessage: string;
+  ResponseMessage: string;
 }>;
 
 export type CreateInput = z.input<typeof Create>;

@@ -190,7 +190,7 @@ export type ProcessPaymentResponse = Partial<{
    * Mensaje de respuesta ISO-8583.
    * Valor sólo presente si el ResponseCode = ISO8583
    */
-  ReponseMessage: string;
+  ResponseMessage: string;
   /**
    * Número del ticket correspondiente a la transacción
    */
