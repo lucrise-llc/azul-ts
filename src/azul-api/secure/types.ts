@@ -1,8 +1,8 @@
 import type { ProcessPaymentSchemaInput } from '../process-payment/schemas';
 
 export type SecureSale = ProcessPaymentSchemaInput & {
-  cardHolderInfo: CardHolderInfo;
-  browserInfo: BrowserInfo;
+  cardHolderInfo: Partial<CardHolderInfo>;
+  browserInfo: Partial<BrowserInfo>;
   threeDSAuth: ThreeDSAuth;
 } & {
   useIframe?: boolean;
