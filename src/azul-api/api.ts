@@ -15,13 +15,13 @@ import { Secure } from './secure/secure';
 class AzulAPI {
   private requester: AzulRequester;
 
-  public valut: DataVault;
+  public vault: DataVault;
   public payments: ProcessPayment;
   public secure: Secure;
 
   constructor(config: Config) {
     this.requester = new AzulRequester(config);
-    this.valut = new DataVault(this.requester);
+    this.vault = new DataVault(this.requester);
     this.payments = new ProcessPayment(this.requester);
     this.secure = new Secure(this.requester);
   }
