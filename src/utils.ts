@@ -2,6 +2,7 @@ function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+// @ts-ignore
 export function capitalizeKeys(obj: any): any {
   const newObj: any = {};
 
