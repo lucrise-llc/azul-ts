@@ -2,11 +2,11 @@
   "name": "@lucrise/azul-ts",
   "version": "0.0.1",
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "index.js",
+  "types": "index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js"
+      "import": "./index.js"
     }
   },
   "scripts": {
