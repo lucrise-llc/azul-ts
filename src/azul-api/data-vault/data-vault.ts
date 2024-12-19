@@ -1,14 +1,6 @@
-import { ProcessPaymentTransaction } from '../process-payment/process-payment';
-import { ProcessPaymentResponse } from '../process-payment/schemas';
 import { Process } from '../processes';
 import AzulRequester from '../request';
-import {
-  Create,
-  CreateInput,
-  DataVaultResponse,
-  DataVaultSaleInput,
-  DataVaultSaleSchema
-} from './schemas';
+import { Create, CreateInput, DataVaultResponse } from './schemas';
 
 enum DataVaultTransaction {
   CREATE = 'CREATE',
@@ -49,19 +41,6 @@ class DataVault {
       },
       Process.Datavault
     );
-  }
-
-  /**
-   * ### Sale: Transacción de Venta
-   * Te permite realizar una transacción de venta con un token generado por la transacción
-   * de DataVault.
-   */
-  async sale(input: DataVaultSaleInput): Promise<ProcessPaymentResponse> {
-    return await this.requester.safeRequest({
-      ...DataVaultSaleSchema.parse(input),
-      expiration: '',
-      trxType: ProcessPaymentTransaction.SALE
-    });
   }
 }
 
