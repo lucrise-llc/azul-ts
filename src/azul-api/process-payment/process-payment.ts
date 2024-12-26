@@ -1,11 +1,6 @@
 import AzulRequester from '../request';
-import {
-  ProcessPaymentResponse,
-  ProcessPaymentSchemaInput,
-  ProcessPaymentSchema,
-  RefundSchemaInput,
-  RefundSchema
-} from './schemas';
+import { ProcessPaymentSchema, RefundSchema } from './schemas';
+import { ProcessPaymentResponse, ProcessPaymentSchemaInput, RefundSchemaInput } from './types';
 
 export enum ProcessPaymentTransaction {
   SALE = 'Sale',

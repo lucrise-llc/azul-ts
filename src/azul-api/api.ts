@@ -8,7 +8,7 @@ import {
 import AzulRequester, { Config } from './request';
 import DataVault from './data-vault/data-vault';
 import ProcessPayment from './process-payment/process-payment';
-import { ProcessPaymentResponse } from './process-payment/schemas';
+import { ProcessPaymentResponse } from './process-payment/types';
 import { Process } from './processes';
 import { Secure } from './secure/secure';
 

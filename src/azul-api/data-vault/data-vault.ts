@@ -1,6 +1,7 @@
 import { Process } from '../processes';
 import AzulRequester from '../request';
-import { Create, CreateInput, DataVaultResponse } from './schemas';
+import { CreateInput, DataVaultResponse } from './types';
+import { Create } from './schemas';
 
 enum DataVaultTransaction {
   CREATE = 'CREATE',
