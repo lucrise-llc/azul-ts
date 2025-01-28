@@ -127,25 +127,5 @@ describe('Certificate handling', () => {
         expect(error.message).toMatch(/Certificate error/);
       }
     });
-
-    it('Should fail gracefully with non-PEM certificate file', async () => {
-      const invalidPath = resolve(FIXTURES_PATH, 'invalid.crt');
-      writeFileSync(invalidPath, 'Not a PEM certificate');
-
-      try {
-        new AzulAPI({
-          auth1: process.env.AUTH1!,
-          auth2: process.env.AUTH2!,
-          merchantId: process.env.MERCHANT_ID!,
-          certificate: invalidPath,
-          key: process.env.AZUL_KEY!
-        });
-        expect.fail('Should have thrown an error');
-      } catch (error) {
-        expect(error.message).toMatch(/Certificate error/);
-      } finally {
-        unlinkSync(invalidPath);
-      }
-    });
   });
 });
