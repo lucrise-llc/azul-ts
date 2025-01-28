@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Create } from './schemas';
+import { Create, Delete } from './schemas';
 
 export type DataVaultResponse = Partial<{
   /**
@@ -30,7 +30,7 @@ export type DataVaultResponse = Partial<{
   HasCVV: boolean;
   /**
    * Código ISO-8583 recibido de respuesta.
-   * Cuando la transacción es exitosa se recibe el valor “00”
+   * Cuando la transacción es exitosa se recibe el valor "00"
    */
   IsoCode: string;
   /**
@@ -40,3 +40,4 @@ export type DataVaultResponse = Partial<{
 }>;
 
 export type CreateInput = z.input<typeof Create>;
+export type DeleteInput = z.input<typeof Delete>;
