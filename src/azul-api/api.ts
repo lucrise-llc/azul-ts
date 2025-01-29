@@ -19,12 +19,11 @@ class AzulAPI {
   public vault: DataVault;
   public payments: ProcessPayment;
   public secure: Secure;
-  public certificate: any;
-  public key: any;
+  public certificate: string;
+  public key: string;
 
   constructor(config: Config) {
     try {
-      // Get validated certificates
       const validatedConfig = {
         ...config,
         certificate: getCertificate(config.certificate),
@@ -35,6 +34,8 @@ class AzulAPI {
       this.vault = new DataVault(this.requester);
       this.payments = new ProcessPayment(this.requester);
       this.secure = new Secure(this.requester);
+      this.certificate = validatedConfig.certificate;
+      this.key = validatedConfig.key;
     } catch (error) {
       throw new Error(
         `Certificate error: ${error instanceof Error ? error.message : String(error)}`

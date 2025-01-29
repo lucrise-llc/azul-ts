@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { CVC, cardNumber, expiration, channel, saveToDataVault } from '../schemas';
+import { CVC, cardNumber, expiration, channel } from '../schemas';
 
 export const Create = z.object({
   /**

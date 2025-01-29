@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, beforeAll, afterAll } from 'vitest';
 import { resolve } from 'path';
 import { writeFileSync, unlinkSync, readFileSync } from 'fs';
 import AzulAPI from '../../src/azul-api/api';
@@ -19,16 +19,33 @@ describe('Certificate handling', () => {
       ITBIS: 10
     };
 
-    const REAL_CERT_PATH = process.env.AZUL_CERT!;
-    const REAL_KEY_PATH = process.env.AZUL_KEY!;
+    const CERT_CONTENT = process.env.AZUL_CERT!;
+    const KEY_CONTENT = process.env.AZUL_KEY!;
+
+    const TEMP_CERT_PATH = resolve(__dirname, '../fixtures/certificates/temp.crt');
+    const TEMP_KEY_PATH = resolve(__dirname, '../fixtures/certificates/temp.key');
+
+    beforeAll(() => {
+      writeFileSync(TEMP_CERT_PATH, CERT_CONTENT);
+      writeFileSync(TEMP_KEY_PATH, KEY_CONTENT);
+    });
+
+    afterAll(() => {
+      try {
+        unlinkSync(TEMP_CERT_PATH);
+        unlinkSync(TEMP_KEY_PATH);
+      } catch (error) {
+        // Ignore cleanup errors
+      }
+    });
 
     it('Can make payment with certificate files', async () => {
       const azul = new AzulAPI({
         auth1: process.env.AUTH1!,
         auth2: process.env.AUTH2!,
         merchantId: process.env.MERCHANT_ID!,
-        certificate: REAL_CERT_PATH,
-        key: REAL_KEY_PATH
+        certificate: TEMP_CERT_PATH,
+        key: TEMP_KEY_PATH
       });
 
       const result = await azul.payments.sale(samplePayment);
@@ -42,8 +59,8 @@ describe('Certificate handling', () => {
         auth1: process.env.AUTH1!,
         auth2: process.env.AUTH2!,
         merchantId: process.env.MERCHANT_ID!,
-        certificate: process.env.AZUL_CERT!.replace(/\n/g, '\\n'),
-        key: process.env.AZUL_KEY!.replace(/\n/g, '\\n')
+        certificate: CERT_CONTENT.replace(/\n/g, '\\n'),
+        key: KEY_CONTENT.replace(/\n/g, '\\n')
       });
 
       const result = await azul.payments.sale({
@@ -60,8 +77,8 @@ describe('Certificate handling', () => {
         auth1: process.env.AUTH1!,
         auth2: process.env.AUTH2!,
         merchantId: process.env.MERCHANT_ID!,
-        certificate: process.env.AZUL_CERT!,
-        key: process.env.AZUL_KEY!
+        certificate: CERT_CONTENT,
+        key: KEY_CONTENT
       });
 
       const result = await azul.payments.sale({
@@ -74,15 +91,12 @@ describe('Certificate handling', () => {
     }, 60000);
 
     it('Can make payment with base64 encoded certificates', async () => {
-      const certContent = readFileSync(REAL_CERT_PATH, 'utf8');
-      const keyContent = readFileSync(REAL_KEY_PATH, 'utf8');
-
       const azul = new AzulAPI({
         auth1: process.env.AUTH1!,
         auth2: process.env.AUTH2!,
         merchantId: process.env.MERCHANT_ID!,
-        certificate: Buffer.from(certContent).toString('base64'),
-        key: Buffer.from(keyContent).toString('base64')
+        certificate: Buffer.from(CERT_CONTENT).toString('base64'),
+        key: Buffer.from(KEY_CONTENT).toString('base64')
       });
 
       const result = await azul.payments.sale({
@@ -96,8 +110,6 @@ describe('Certificate handling', () => {
   });
 
   describe('Certificate parsing', () => {
-    const FIXTURES_PATH = resolve(__dirname, '../fixtures/certificates');
-
     it('Should fail gracefully with invalid certificate path', () => {
       try {
         new AzulAPI({
