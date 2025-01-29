@@ -4,13 +4,11 @@ on:
     paths:
       - 'src/**'
       - 'tests/**'
-      - '.github/workflows/test.yaml'
       - '.github/workflows/release.yaml'
   pull_request:
     paths:
       - 'src/**'
       - 'tests/**'
-      - '.github/workflows/test.yaml'
       - '.github/workflows/release.yaml'
 
 permissions:
