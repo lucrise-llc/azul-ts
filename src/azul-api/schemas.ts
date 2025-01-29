@@ -13,8 +13,8 @@ export const acquirerRefData = z.enum(['0', '1']).optional().default('1');
 export const customerServicePhone = z.string().max(32).optional();
 export const ECommerceURL = z.string().max(32).optional();
 export const customOrderId = z.string().max(75).optional();
-export const altMerchantName = z.string().max(30).optional();
-export const dataVaultToken = z.string().max(100).optional();
+export const altMerchantName = z.string().max(25).optional();
+export const dataVaultToken = z.string().max(36).optional();
 export const saveToDataVault = z.enum(['1', '2']).optional();
 export const forceNo3DS = z.enum(['0', '1']).optional();
 
@@ -41,7 +41,7 @@ export const PostSchema = z
      * transacción. En el campo de Amount debe enviarse
      * total a cargar incluyendo el ITBIS.
      * Si la transacción o el negocio están exentos, se
-     * envía en cero colocando el valo “000”.
+     * envía en cero colocando el valo "000".
      *
      * Este valor deberá también ser incluido en el cálculo
      * del hash.

@@ -1,12 +1,7 @@
 import { Process } from '../processes';
 import AzulRequester from '../request';
-import { CreateInput, DataVaultResponse } from './types';
-import { Create } from './schemas';
-
-enum DataVaultTransaction {
-  CREATE = 'CREATE',
-  DELETE = 'DELETE'
-}
+import { CreateInput, DataVaultResponse, DeleteInput } from './types';
+import { Create, Delete } from './schemas';
 
 class DataVault {
   private readonly requester: AzulRequester;
@@ -22,10 +17,10 @@ class DataVault {
    */
   async create(input: CreateInput): Promise<DataVaultResponse> {
     return await this.requester.safeRequest(
-      {
-        ...Create.parse(input),
-        trxType: DataVaultTransaction.CREATE
-      },
+      Create.parse({
+        ...input,
+        trxType: 'CREATE'
+      }),
       Process.Datavault
     );
   }
@@ -34,12 +29,12 @@ class DataVault {
    * ### Delete: Eliminación de Token de Bóveda de Datos (DataVault)
    * Con esta transacción se solicita la eliminación de un token de la Bóveda de Datos.
    */
-  async delete(dataVaultToken: string): Promise<DataVaultResponse> {
+  async delete(input: DeleteInput): Promise<DataVaultResponse> {
     return await this.requester.safeRequest(
-      {
-        dataVaultToken,
-        trxType: DataVaultTransaction.DELETE
-      },
+      Delete.parse({
+        ...input,
+        trxType: 'DELETE'
+      }),
       Process.Datavault
     );
   }

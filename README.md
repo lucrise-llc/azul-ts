@@ -42,7 +42,8 @@ const azul = new AzulPage({
   merchantId: process.env.MERCHANT_ID!,
   authKey: process.env.AUTH_KEY!,
   merchantName: 'RapidoTickets',
-  merchantType: 'Ecommerce'
+  merchantType: 'Ecommerce',
+  environment: 'dev'
 });
 ```
 
@@ -97,7 +98,7 @@ https://rapidotickets.com/?OrderNumber=1234&Amount=1000&Itbis=100&AuthorizationC
 
 ## API (WebService)
 
-To use the Azul API, you need to initialize the `AzulAPI` class with your merchant ID, auth keys, certificate path, and key path.
+To use the Azul API, you need to initialize the `AzulAPI` class with your merchant ID, auth keys, and certificates.
 
 ```typescript
 import AzulAPI from '@lucrise/azul-ts';
@@ -106,15 +107,19 @@ const azul = new AzulAPI({
   auth1: 'your-auth1',
   auth2: 'your-auth2',
   merchantId: 'your-merchant-id',
-  certificate: 'your-certificate',
-  key: 'your-key'
+  certificate: 'path/to/certificate.crt',
+  key: 'path/to/private.key',
+  environment: 'dev',
+  channel: 'EC'
 });
 ```
 
 The `auth1` and `auth2` are the authentication credentials provided by Azul.<br/>
 The `merchantId` is the merchant ID provided by Azul.<br/>
-The `certificate` is the certificate sent to you by Azul.<br/>
-The `key` is the private key that generated the CSR file you sent to Azul in order to obtain the certificate.<br/>
+The `certificate` is the certificate sent to you by Azul. Can be provided as a file path or PEM content directly.<br/>
+The `key` is the private key that generated the CSR file. Can be provided as a file path or PEM content directly.<br/>
+The `environment` determines which Azul endpoint to use ('dev' or 'prod'). Defaults to 'dev'.<br/>
+The `channel` is the payment channel code provided by Azul. Defaults to 'EC'.<br/>
 
 Then, you can use the `AzulAPI` class to make requests to the Azul API.
 
@@ -127,12 +132,17 @@ const app = express();
 
 app.get('/pay-now', async (req, res) => {
   const result = await azul.payments.sale({
-    cardNumber: req.query.cardNumber,
-    expiration: req.query.expiration,
-    CVC: req.query.CVC,
-    customOrderId: req.query.customOrderId,
-    amount: req.query.amount,
-    ITBIS: req.query.ITBIS
+    cardNumber: req.query.cardNumber, // Card number without spaces or special chars
+    expiration: req.query.expiration, // Format: YYYYMM (e.g., 202412)
+    CVC: req.query.CVC, // 3 or 4 digits
+    amount: req.query.amount, // Integer. Last 2 digits are decimals (e.g., 1000 = $10.00)
+    ITBIS: req.query.ITBIS, // Integer. Last 2 digits are decimals (e.g., 100 = $1.00)
+    customOrderId: req.query.customOrderId, // Optional. Max 75 chars. Used for payment verification
+    orderNumber: req.query.orderNumber, // Optional. Max 15 chars
+    channel: 'EC', // Optional. Defaults to 'EC'
+    posInputMode: 'E-Commerce', // Optional. Defaults to 'E-Commerce'
+    saveToDataVault: '2', // Optional. '1' to save card, '2' to not save
+    altMerchantName: 'My Store' // Optional. Max 25 chars. Shown in card statement
   });
 
   res.send(result);

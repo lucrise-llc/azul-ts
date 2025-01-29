@@ -2,23 +2,27 @@ import { randomUUID } from 'crypto';
 import { azul } from './instance';
 import { describe, expect, it } from 'vitest';
 import 'dotenv/config';
+import { getCard } from '../fixtures/cards';
+import { expectSuccessfulPayment, expectSuccessfulVerification } from '../utils';
 
 describe('Can post a payment', () => {
   it('Can post a hold', async () => {
     const customOrderId = randomUUID();
 
-    const hold = await azul.payments.hold({
-      cardNumber: '6011000990099818',
-      expiration: '202412',
-      CVC: '818',
+    const testCard = getCard('VISA_TEST_CARD'); // Use specific test card
+    const samplePayment = {
+      cardNumber: testCard.number,
+      expiration: testCard.expiration,
+      CVC: testCard.cvv,
       customOrderId,
       amount: 100,
       ITBIS: 10
-    });
+    };
+
+    const hold = await azul.payments.hold(samplePayment);
 
     expect(hold).toBeDefined();
-    expect(hold.IsoCode).toBe('00');
-    expect(hold.AzulOrderId).toBeDefined();
+    expectSuccessfulPayment(hold);
 
     const post = await azul.post({
       azulOrderId: hold.AzulOrderId!,
@@ -27,11 +31,10 @@ describe('Can post a payment', () => {
     });
 
     expect(post).toBeDefined();
-    expect(post.IsoCode).toBe('00');
+    expectSuccessfulPayment(post);
 
     const verify = await azul.verifyPayment(customOrderId);
     expect(verify).toBeDefined();
-    expect(verify.Found).toBe(true);
-    expect(verify.TransactionType).toBe('Post');
+    expectSuccessfulVerification(verify, 'Post');
   }, 60000);
 });

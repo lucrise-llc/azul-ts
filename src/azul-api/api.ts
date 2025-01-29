@@ -11,6 +11,7 @@ import ProcessPayment from './process-payment/process-payment';
 import { ProcessPaymentResponse } from './process-payment/types';
 import { Process } from './processes';
 import { Secure } from './secure/secure';
+import { getCertificate } from '../config';
 
 class AzulAPI {
   private requester: AzulRequester;
@@ -18,12 +19,27 @@ class AzulAPI {
   public vault: DataVault;
   public payments: ProcessPayment;
   public secure: Secure;
+  public certificate: any;
+  public key: any;
 
   constructor(config: Config) {
-    this.requester = new AzulRequester(config);
-    this.vault = new DataVault(this.requester);
-    this.payments = new ProcessPayment(this.requester);
-    this.secure = new Secure(this.requester);
+    try {
+      // Get validated certificates
+      const validatedConfig = {
+        ...config,
+        certificate: getCertificate(config.certificate),
+        key: getCertificate(config.key)
+      };
+
+      this.requester = new AzulRequester(validatedConfig);
+      this.vault = new DataVault(this.requester);
+      this.payments = new ProcessPayment(this.requester);
+      this.secure = new Secure(this.requester);
+    } catch (error) {
+      throw new Error(
+        `Certificate error: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
   }
 
   /**
@@ -39,8 +55,8 @@ class AzulAPI {
 
   /**
    * ### Transacción para hacer captura o posteo del Hold
-   * El método “Post” permite capturar un “Hold” realizado previamente para su liquidación.
-   * El monto del “Post” puede ser igual o menor al monto del “Hold”. En caso de que el
+   * El método "Post" permite capturar un "Hold" realizado previamente para su liquidación.
+   * El monto del "Post" puede ser igual o menor al monto del "Hold". En caso de que el
    * monto del Post sea menor al Hold, se envía un mensaje de reverso para liberar los
    * fondos retenidos a la tarjeta.
    */

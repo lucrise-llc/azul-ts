@@ -2,22 +2,25 @@ import { randomUUID } from 'crypto';
 import { azul } from './instance';
 import { describe, expect, it, beforeAll } from 'vitest';
 import 'dotenv/config';
+import { getCard } from '../fixtures/cards';
+import { expectSuccessfulPayment } from '../utils';
 
 describe('Can search a payment', () => {
   const customOrderId = randomUUID();
 
   beforeAll(async () => {
+    const testCard = getCard('DISCOVER');
     const result = await azul.payments.sale({
-      cardNumber: '6011000990099818',
-      expiration: '202412',
-      CVC: '818',
+      cardNumber: testCard.number,
+      expiration: testCard.expiration,
+      CVC: testCard.cvv,
       customOrderId,
       amount: 100,
       ITBIS: 10
     });
 
     expect(result).toBeDefined();
-    expect(result.IsoCode).toBe('00');
+    expectSuccessfulPayment(result);
   }, 60000);
 
   it('Can search a payment', async () => {

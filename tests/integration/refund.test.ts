@@ -2,27 +2,29 @@ import { randomUUID } from 'crypto';
 import { azul } from './instance';
 import { describe, expect, it } from 'vitest';
 import 'dotenv/config';
+import { getCard } from '../fixtures/cards';
+import { expectSuccessfulPayment, expectSuccessfulVerification } from '../utils';
 
-describe('Can refund a payment', () => {
+describe('Refund', () => {
   it('Can refund a sale', async () => {
     const customOrderId = randomUUID();
+    const testCard = getCard('DISCOVER');
 
     const sale = await azul.payments.sale({
-      cardNumber: '6011000990099818',
-      expiration: '202412',
-      CVC: '818',
+      cardNumber: testCard.number,
+      expiration: testCard.expiration,
+      CVC: testCard.cvv,
       customOrderId,
       amount: 100,
       ITBIS: 10
     });
 
     expect(sale).toBeDefined();
-    expect(sale.IsoCode).toBe('00');
-    expect(sale.AzulOrderId).toBeDefined();
+    expectSuccessfulPayment(sale);
 
     const refund = await azul.payments.refund({
-      cardNumber: '6011000990099818',
-      expiration: '202412',
+      cardNumber: testCard.number,
+      expiration: testCard.expiration,
       customOrderId,
       amount: 100,
       ITBIS: 10,
@@ -30,29 +32,28 @@ describe('Can refund a payment', () => {
     });
 
     expect(refund).toBeDefined();
-    expect(refund.IsoCode).toBe('00');
+    expectSuccessfulPayment(refund);
 
     const verify = await azul.verifyPayment(customOrderId);
     expect(verify).toBeDefined();
-    expect(verify.Found).toBe(true);
-    expect(verify.TransactionType).toBe('Refund');
+    expectSuccessfulVerification(verify, 'Refund');
   }, 60000);
 
   it('Can refund a post', async () => {
     const customOrderId = randomUUID();
+    const testCard = getCard('DISCOVER');
 
     const result = await azul.payments.hold({
-      cardNumber: '6011000990099818',
-      expiration: '202412',
-      CVC: '818',
+      cardNumber: testCard.number,
+      expiration: testCard.expiration,
+      CVC: testCard.cvv,
       customOrderId,
       amount: 100,
       ITBIS: 10
     });
 
     expect(result).toBeDefined();
-    expect(result.IsoCode).toBe('00');
-    expect(result.AzulOrderId).toBeDefined();
+    expectSuccessfulPayment(result);
 
     const post = await azul.post({
       azulOrderId: result.AzulOrderId!,
@@ -61,11 +62,11 @@ describe('Can refund a payment', () => {
     });
 
     expect(post).toBeDefined();
-    expect(post.IsoCode).toBe('00');
+    expectSuccessfulPayment(post);
 
     const refund = await azul.payments.refund({
-      cardNumber: '6011000990099818',
-      expiration: '202412',
+      cardNumber: testCard.number,
+      expiration: testCard.expiration,
       customOrderId,
       amount: 100,
       ITBIS: 10,
@@ -73,11 +74,10 @@ describe('Can refund a payment', () => {
     });
 
     expect(refund).toBeDefined();
-    expect(refund.IsoCode).toBe('00');
+    expectSuccessfulPayment(refund);
 
     const verify = await azul.verifyPayment(customOrderId);
     expect(verify).toBeDefined();
-    expect(verify.Found).toBe(true);
-    expect(verify.TransactionType).toBe('Refund');
+    expectSuccessfulVerification(verify, 'Refund');
   }, 60000);
 });

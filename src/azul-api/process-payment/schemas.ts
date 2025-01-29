@@ -17,30 +17,13 @@ import {
   saveToDataVault
 } from '../schemas';
 
-export const ProcessPaymentSchema = z.object({
+const BasePaymentSchema = z.object({
   /**
    * Canal de pago.
    * Este valor es proporcionado por AZUL, junto a los
    * datos de acceso a cada ambiente
    */
   channel,
-  /**
-   * Número de tarjeta a la cual se le ha de cargar la
-   * transacción.
-   * La longitud del campo se determina por la tarjeta,
-   * no se debe rellenar con ceros (0), espacios, ni
-   * caracteres especiales
-   */
-  cardNumber,
-  /**
-   * Fecha expiración/vencimiento de la tarjeta
-   * Formato YYYYMM Ej.: 201502
-   */
-  expiration,
-  /**
-   * Código de seguridad de la tarjeta (CVV2 o CVC).
-   */
-  CVC,
   /**
    * Modo de ingreso.
    * Este valor es proporcionado por AZUL, junto a los
@@ -63,10 +46,7 @@ export const ProcessPaymentSchema = z.object({
    * transacción. En el campo de Amount debe enviarse
    * total a cargar incluyendo el ITBIS.
    * Si la transacción o el negocio están exentos, se
-   * envía en cero colocando el valo “000”.
-   *
-   * Este valor deberá también ser incluido en el cálculo
-   * del hash.
+   * envía en cero colocando el valo "000".
    */
   ITBIS,
   /**
@@ -104,12 +84,42 @@ export const ProcessPaymentSchema = z.object({
    * indicador único de orden.
    * El campo solo acepta un máximo de 25 caracteres.
    * No utilizar los siguientes caracteres especiales:
-   * “ Genera un error en el request.
+   * " Genera un error en el request.
    * \ Genera un error en el request.
    * ' Este carácter no se muestra en el mensaje del
    * emisor.
    */
-  altMerchantName,
+  altMerchantName
+});
+
+const CardPaymentSchema = BasePaymentSchema.extend({
+  /**
+   * Número de tarjeta a la cual se le ha de cargar la
+   * transacción.
+   * La longitud del campo se determina por la tarjeta,
+   * no se debe rellenar con ceros (0), espacios, ni
+   * caracteres especiales
+   */
+  cardNumber,
+  /**
+   * Fecha expiración/vencimiento de la tarjeta
+   * Formato YYYYMM Ej.: 201502
+   */
+  expiration,
+  /**
+   * Código de seguridad de la tarjeta (CVV2 o CVC).
+   */
+  CVC,
+  /**
+   * Valores posibles 1 = si, 2 = no. Si se manda este
+   * valor en 1, SDP le devolverá el token generado en
+   * el campo DataVaultToken
+   */
+  saveToDataVault,
+  dataVaultToken: z.undefined()
+});
+
+const TokenPaymentSchema = BasePaymentSchema.extend({
   /**
    * Valor del token generado por SDP en caso de que
    * se desee realizar una transacción con dicho token.
@@ -119,21 +129,22 @@ export const ProcessPaymentSchema = z.object({
    * depende de lo conversado con Negocios SDP. Si es
    * MOTO la transacción, no se debería enviar CVC.
    */
-  dataVaultToken,
-  /**
-   * Valores posibles 1 = si, 2 = no. Si se manda este
-   * valor en 1, SDP le devolverá el token generado en
-   * el campo DataVaultToken
-   */
-  saveToDataVault
+  dataVaultToken: z.string().max(36),
+  cardNumber: z.literal(''),
+  expiration: z.literal(''),
+  CVC: z.undefined(),
+  saveToDataVault: z.undefined()
 });
 
-export const RefundRequestSchema = z
-  .object({
+export const ProcessPaymentSchema = z.union([CardPaymentSchema, TokenPaymentSchema]);
+
+export const RefundRequestSchema = z.intersection(
+  ProcessPaymentSchema,
+  z.object({
     OriginalDate: z.string().length(8),
     OriginalTrxTicketNr: z.string().length(4).optional()
   })
-  .merge(ProcessPaymentSchema);
+);
 
 export const RefundSchema = z.object({
   /**
@@ -156,10 +167,6 @@ export const RefundSchema = z.object({
    */
   expiration,
   /**
-   * Código de seguridad de la tarjeta (CVV2 o CVC).
-   */
-  // CVC,
-  /**
    * Modo de ingreso.
    * Este valor es proporcionado por AZUL, junto a los
    * datos de acceso a cada ambiente
@@ -181,10 +188,7 @@ export const RefundSchema = z.object({
    * transacción. En el campo de Amount debe enviarse
    * total a cargar incluyendo el ITBIS.
    * Si la transacción o el negocio están exentos, se
-   * envía en cero colocando el valo “000”.
-   *
-   * Este valor deberá también ser incluido en el cálculo
-   * del hash.
+   * envía en cero colocando el valo "000".
    */
   ITBIS,
   /**
@@ -217,7 +221,7 @@ export const RefundSchema = z.object({
    * indicador único de orden.
    * El campo solo acepta un máximo de 25 caracteres.
    * No utilizar los siguientes caracteres especiales:
-   * “ Genera un error en el request.
+   * " Genera un error en el request.
    * \ Genera un error en el request.
    * ' Este carácter no se muestra en el mensaje del
    * emisor.

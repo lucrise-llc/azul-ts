@@ -1,46 +1,83 @@
 import { azul } from './instance';
 import { describe, expect, it } from 'vitest';
 import 'dotenv/config';
+import { getCard } from '../fixtures/cards';
+import {
+  expectSuccessfulPayment,
+  expectSuccessfulVaultResponse,
+  expectSuccessfulVaultDeletion
+} from '../utils';
 
 describe('DataVault', () => {
   let dataVaultToken: string;
 
   it('Can create a DataVault token', async () => {
+    const testCard = getCard('DISCOVER');
     const result = await azul.vault.create({
-      cardNumber: '6011000990099818',
-      expiration: '202412',
-      CVC: '818'
+      cardNumber: testCard.number,
+      expiration: testCard.expiration,
+      CVC: testCard.cvv,
+      channel: 'EC',
+      store: process.env.MERCHANT_ID!,
+      trxType: 'CREATE',
+      saveToDataVault: '1'
     });
 
     expect(result).toBeDefined();
-    expect(result.IsoCode).toBe('00');
-    expect(result.DataVaultToken).toBeDefined();
+    expectSuccessfulVaultResponse(result);
     dataVaultToken = result.DataVaultToken!;
   }, 60000);
 
   it('Can make a payment with a DataVault token', async () => {
+    const orderNumber = Date.now().toString().slice(-15);
     const result = await azul.payments.sale({
       dataVaultToken,
+      cardNumber: '',
+      expiration: '',
       amount: 100,
-      ITBIS: 10
+      ITBIS: 10,
+      channel: 'EC',
+      posInputMode: 'E-Commerce',
+      customOrderId: orderNumber,
+      orderNumber,
+      acquirerRefData: '1',
+      customerServicePhone: '8095551234',
+      ECommerceURL: 'https://example.com',
+      altMerchantName: 'Test Merchant'
     });
 
     expect(result).toBeDefined();
-    expect(result.IsoCode).toBe('00');
+    expectSuccessfulPayment(result);
   }, 60000);
 
   it('Can delete a DataVault token', async () => {
-    const result = await azul.vault.delete(dataVaultToken);
+    const result = await azul.vault.delete({
+      dataVaultToken,
+      channel: 'EC',
+      store: process.env.MERCHANT_ID!,
+      trxType: 'DELETE'
+    });
 
     expect(result).toBeDefined();
-    expect(result.IsoCode).toBe('00');
+    expectSuccessfulVaultDeletion(result);
   }, 60000);
 
   it('After deleting a DataVault token, it should not be possible to make a payment with it', async () => {
+    const orderNumber = Date.now().toString().slice(-15);
     const result = await azul.payments.sale({
       dataVaultToken,
+      cardNumber: '',
+      expiration: '',
       amount: 100,
-      ITBIS: 10
+      ITBIS: 10,
+      channel: 'EC',
+      posInputMode: 'E-Commerce',
+      customOrderId: `FAIL${orderNumber}`,
+      orderNumber,
+      acquirerRefData: '1',
+      customerServicePhone: '8095551234',
+      ECommerceURL: 'https://example.com',
+      altMerchantName: 'Test Merchant'
     });
 
     expect(result).toBeDefined();
