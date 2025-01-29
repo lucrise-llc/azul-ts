@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import { describe, expect, it, beforeAll, afterAll } from 'vitest';
 import { resolve } from 'path';
-import { writeFileSync, unlinkSync, readFileSync } from 'fs';
+import { writeFileSync, unlinkSync, mkdirSync, existsSync } from 'fs';
 import AzulAPI from '../../src/azul-api/api';
 import { getRandomCard } from '../fixtures/cards';
 import { expectSuccessfulPayment } from '../utils';
@@ -22,10 +22,14 @@ describe('Certificate handling', () => {
     const CERT_CONTENT = process.env.AZUL_CERT!;
     const KEY_CONTENT = process.env.AZUL_KEY!;
 
-    const TEMP_CERT_PATH = resolve(__dirname, '../fixtures/certificates/temp.crt');
-    const TEMP_KEY_PATH = resolve(__dirname, '../fixtures/certificates/temp.key');
+    const TEMP_DIR = resolve(__dirname, '../fixtures/certificates');
+    const TEMP_CERT_PATH = resolve(TEMP_DIR, 'temp.crt');
+    const TEMP_KEY_PATH = resolve(TEMP_DIR, 'temp.key');
 
     beforeAll(() => {
+      if (!existsSync(TEMP_DIR)) {
+        mkdirSync(TEMP_DIR, { recursive: true });
+      }
       writeFileSync(TEMP_CERT_PATH, CERT_CONTENT);
       writeFileSync(TEMP_KEY_PATH, KEY_CONTENT);
     });

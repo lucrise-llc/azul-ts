@@ -1,18 +1,44 @@
-name: Release
+name: Test and Release
 on:
   push:
-    branches:
-      - main
     paths:
       - 'src/**'
+      - 'tests/**'
+      - '.github/workflows/test.yaml'
+      - '.github/workflows/release.yaml'
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - '.github/workflows/test.yaml'
       - '.github/workflows/release.yaml'
 
 permissions:
   contents: read
 
 jobs:
+  integration-tests:
+    name: Run integration tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+      - run: npm ci
+      - name: Run tests
+        env:
+          AUTH1: ${{ secrets.AUTH1 }}
+          AUTH2: ${{ secrets.AUTH2 }}
+          MERCHANT_ID: ${{ secrets.MERCHANT_ID }}
+          AZUL_KEY: ${{ secrets.AZUL_KEY }}
+          AZUL_CERT: ${{ secrets.AZUL_CERT }}
+        run: npm run test
+
   release:
     name: Release
+    needs: integration-tests
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -27,10 +53,10 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "lts/*"
+          node-version: 'lts/*'
       - name: Install dependencies
         run: npm clean-install
-      - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
+      - name: Verify the integrity of provenance attestations and registry signatures
         run: npm audit signatures
       - name: Build
         run: npm run build
