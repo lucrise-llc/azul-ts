@@ -66,6 +66,6 @@ describe('Can make a payment', () => {
     });
 
     expect(result.type).toBe('error');
-    expect(result.ErrorDescription).toBe('VALIDATION_ERROR:AmountExceeded');
+    expect(result.ErrorDescription).toBe('INSUF FONDOS');
   });
 });
