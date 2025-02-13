@@ -3,7 +3,6 @@ import type { ProcessPaymentSchema } from '../process-payment/schemas';
 
 export type SecureSale = z.infer<typeof ProcessPaymentSchema> & {
   cardHolderInfo: Partial<CardHolderInfo>;
-  browserInfo: Partial<BrowserInfo>;
   threeDSAuth: ThreeDSAuth;
 } & {
   useIframe?: boolean;
@@ -211,51 +210,4 @@ export type CardHolderInfo = {
    * Máximo 24 caracteres, incluyendo espacios
    */
   ShippingAddressZip: string;
-};
-
-export type BrowserInfo = {
-  /**
-   * Contiene los tipos de contenido que el cliente puede aceptar, ordenados por la calidad del contenido.
-   */
-  AcceptHeader: string;
-
-  /**
-   * Dirección IP del cliente.
-   */
-  IPAddress: string;
-
-  /**
-   * Idioma preferido del cliente, generalmente el idioma del navegador.
-   */
-  Language: string;
-
-  /**
-   * Profundidad de color de la pantalla del cliente.
-   */
-  ColorDepth: string;
-
-  /**
-   * Ancho de la pantalla del cliente.
-   */
-  ScreenWidth: string;
-
-  /**
-   * Alto de la pantalla del cliente.
-   */
-  ScreenHeight: string;
-
-  /**
-   * Zona horaria del cliente.
-   */
-  TimeZone: string;
-
-  /**
-   * Cadena que identifica al navegador del cliente.
-   */
-  UserAgent: string;
-
-  /**
-   * Indica si JavaScript está habilitado en el navegador del cliente.
-   */
-  JavaScriptEnabled: boolean;
 };

@@ -136,7 +136,16 @@ const TokenPaymentSchema = BasePaymentSchema.extend({
   saveToDataVault: z.undefined()
 });
 
-export const ProcessPaymentSchema = z.union([CardPaymentSchema, TokenPaymentSchema]);
+export const ProcessPaymentSchema = z.intersection(
+  z.union([CardPaymentSchema, TokenPaymentSchema]),
+  z.object({
+    /**
+     * Valores posibles 1 = si, 0 = no. Si se manda este
+     * valor en 1, SDP no realizará la autenticación 3DS.
+     */
+    forceNo3DS: z.enum(['0', '1']).optional()
+  })
+);
 
 export const RefundRequestSchema = z.intersection(
   ProcessPaymentSchema,
@@ -247,5 +256,13 @@ export const RefundSchema = z.object({
    * Número de orden Azul. Puede ser usado en vez del RRN para generar una
    * devolución. Importante dar prioridad a este valor sobre el RRN.
    */
-  azulOrderId: z.string()
+  azulOrderId: z.string(),
+  /**
+   * Valores posibles 1 = si, 2 = no. Si se manda este
+   * valor en 1, SDP le devolverá el token generado en
+   * el campo DataVaultToken
+   */
+  forceNo3DS: z.enum(['0', '1']).optional()
 });
+
+export type ProcessPayment = z.infer<typeof ProcessPaymentSchema>;

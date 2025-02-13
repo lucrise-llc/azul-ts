@@ -6,16 +6,42 @@ import AzulRequester from '../request';
 import { MethodNotificationStatus, SecureSale } from './types';
 import { sleep } from '../../utils';
 
+/**
+ * Represents a secure payment session with Azul.
+ */
 type SecurePaymentSession = {
   azulOrderId: string;
   termUrl: string;
   methodNotificationUrl: string;
 };
 
+/**
+ * Class to handle secure payment operations with Azul, including 3DS authentication.
+ */
 export class Secure {
   private readonly requester: AzulRequester;
+  /**
+   * Stores active secure payment sessions, keyed by a unique secure ID.
+   * @private
+   */
   private securePaymentSessions = new Map<string, SecurePaymentSession>();
 
+  /**
+   * Stores the results of 3DS Method processing, keyed by secure ID.
+   * @private
+   */
+  private processResult = new Map<string, any>();
+
+  /**
+   * Tracks whether 3DS Method processing is in progress for a given secure ID.
+   * @private
+   */
+  private processLoading = new Map<string, boolean>();
+
+  /**
+   * Creates an instance of the `Secure` class.
+   * @param requester - The AzulRequester instance used for making API requests.
+   */
   constructor(requester: AzulRequester) {
     this.requester = requester;
   }
@@ -36,13 +62,16 @@ export class Secure {
 
     const result = await this.requester.safeRequest({
       ...ProcessPaymentSchema.parse(input),
-      forceNo3DS: '0',
+      forceNo3DS: input.forceNo3DS ?? '0',
       cardHolderInfo: input.cardHolderInfo,
-      browserInfo: input.browserInfo,
       threeDSAuth: {
         ...input.threeDSAuth,
-        TermUrl: input.threeDSAuth.TermUrl + `?id=${secureId}`,
-        MethodNotificationUrl: input.threeDSAuth.MethodNotificationUrl + `?id=${secureId}`
+        TermUrl: input.threeDSAuth.TermUrl.includes('?')
+          ? input.threeDSAuth.TermUrl + `&id=${secureId}`
+          : input.threeDSAuth.TermUrl + `?id=${secureId}`,
+        MethodNotificationUrl: input.threeDSAuth.MethodNotificationUrl.includes('?')
+          ? input.threeDSAuth.MethodNotificationUrl + `&id=${secureId}`
+          : input.threeDSAuth.MethodNotificationUrl + `?id=${secureId}`
       },
       trxType: ProcessPaymentTransaction.SALE
     });
@@ -90,6 +119,11 @@ export class Secure {
     }
   }
 
+  /**
+   * Processes the 3DS Method notification status with Azul.
+   * @param input - An object containing the Azul Order ID and the method notification status.
+   * @returns A promise that resolves to the result of the API request.
+   */
   async process3DS(input: {
     azulOrderId: string;
     methodNotificationStatus: MethodNotificationStatus;
@@ -103,6 +137,13 @@ export class Secure {
     );
   }
 
+  /**
+   * Handles the 3DS challenge response (cRes) from the client.
+   * @param id - The unique secure ID associated with the transaction.
+   * @param cRes - The challenge response string.
+   * @returns A promise that resolves to the result of processing the challenge.
+   * @throws {Error} If the provided ID is invalid.
+   */
   async post3DS(id: string, cRes: string) {
     const session = this.securePaymentSessions.get(id);
 
@@ -116,6 +157,12 @@ export class Secure {
     });
   }
 
+  /**
+   * Sends the 3DS challenge response to Azul.
+   * @param input - An object containing the Azul Order ID and the challenge response.
+   * @returns A promise that resolves to the result of the API request.
+   * @private
+   */
   private async process3DsChallenge(input: { azulOrderId: string; cRes: string }) {
     return await this.requester.safeRequest(
       {
@@ -126,6 +173,13 @@ export class Secure {
     );
   }
 
+  /**
+   * Captures the 3DS result after the method and challenge phases (if applicable).
+   * @param id - The unique secure ID associated with the transaction.
+   * @returns A promise that resolves to an object indicating whether a redirect is required,
+   * along with the redirect HTML content (if a challenge is needed), or the final transaction result.
+   * @throws {Error} If the provided ID is invalid.
+   */
   async capture3DS(id: string): Promise<
     | {
         redirect: true;
@@ -159,25 +213,57 @@ export class Secure {
     };
   }
 
-  private processResult = new Map<string, any>();
-  private processLoading = new Map<string, boolean>();
-
+  /**
+   * Retrieves the 3DS result, handling the asynchronous nature of the 3DS Method Notification.
+   * Implements a 10-second timeout for receiving the Method Notification, as required by Azul.
+   *
+   * @param id - The unique secure ID associated with the transaction.
+   * @returns A promise that resolves to the 3DS result.  If the Method Notification is not
+   *  received within 10 seconds, the `methodNotificationStatus` is set to
+   *  `EXPECTED_BUT_NOT_RECEIVED`.
+   * @private
+   */
   private async get3DResult(id: string) {
     // If we already have the result, return it
     if (this.processResult.has(id)) {
       return this.processResult.get(id);
     }
 
-    // If we are already processing the result, wait for it to finish
+    // If we are already processing the result, wait for it to finish, or timeout
     if (this.processLoading.get(id)) {
-      while (this.processLoading.get(id)) {
-        await sleep(100);
-      }
+      // Use Promise.race to implement the timeout
+      const result = await Promise.race([
+        (async () => {
+          while (this.processLoading.get(id)) {
+            await sleep(100);
+          }
+          return this.processResult.get(id);
+        })(),
+        (async () => {
+          await sleep(10000); // 10-second timeout
+          return { timeout: true }; // Indicate timeout
+        })()
+      ]);
 
-      return this.processResult.get(id);
+      // Check if the result is due to a timeout
+      if (result && typeof result === 'object' && 'timeout' in result && result.timeout) {
+        // Handle timeout: set status to EXPECTED_BUT_NOT_RECEIVED
+        this.processLoading.set(id, true); // Start processing (even though it timed out)
+        const azulOrderId = this.securePaymentSessions.get(id)!.azulOrderId;
+        const timeoutResult = await this.process3DS({
+          azulOrderId,
+          methodNotificationStatus: MethodNotificationStatus.EXPECTED_BUT_NOT_RECEIVED
+        });
+        this.processLoading.set(id, false);
+        this.processResult.set(id, timeoutResult);
+        return timeoutResult;
+      } else {
+        // Notification received within timeout, return the actual result
+        return result;
+      }
     }
 
-    // Otherwise, start processing the result
+    // Otherwise, start processing the result (notification received before get3DResult called)
     this.processLoading.set(id, true);
     const result = await this.process3DS({
       azulOrderId: this.securePaymentSessions.get(id)!.azulOrderId,
@@ -190,6 +276,13 @@ export class Secure {
   }
 }
 
+/**
+ * Generates the HTML for the 3DS challenge form.
+ * @param creq - The challenge request data.
+ * @param termUrl - The URL to which the challenge result should be posted.
+ * @param redirectPostUrl - The URL to which the form should be submitted.
+ * @returns The HTML string for the challenge form.
+ */
 function challengeResponse({
   creq,
   termUrl,

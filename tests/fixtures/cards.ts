@@ -65,6 +65,44 @@ export const TEST_CARDS = {
     number: '4012000033330026',
     expiration: '202812',
     cvv: '123'
+  },
+
+  /**
+   * 3DS test card - Frictionless with 3DS Method
+   */
+  SECURE_3DS_FRICTIONLESS_WITH_3DS: {
+    number: '4265880000000007',
+    expiration: '202812',
+    cvv: '123'
+  },
+
+  /**
+   * 3DS test card - Frictionless without 3DS Method
+   */
+  SECURE_3DS_FRICTIONLESS_NO_3DS: {
+    number: '4147463011110117',
+    expiration: '202812',
+    cvv: '123'
+  },
+
+  /**
+   * 3DS test card - Challenge with 3DS Method
+   * Maximum amount: RD$ 50
+   */
+  SECURE_3DS_CHALLENGE_WITH_3DS: {
+    number: '4005520000000129',
+    expiration: '202812',
+    cvv: '123',
+    maxAmount: 50
+  },
+
+  /**
+   * 3DS test card - Challenge without 3DS Method
+   */
+  SECURE_3DS_CHALLENGE_NO_3DS: {
+    number: '4147463011110059',
+    expiration: '202812',
+    cvv: '123'
   }
 } as const;
 
