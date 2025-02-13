@@ -1,7 +1,15 @@
 import { Process } from '../processes';
 import AzulRequester from '../request';
-import { Create, Delete } from './schemas';
-import { CreateInput, DataVaultResponse, DeleteInput } from './types';
+import {
+  createDataVaultSchema,
+  deleteDataVaultSchema,
+  CreateDataVault,
+  CreateDataVaultResponse,
+  DeleteDataVault,
+  DeleteDataVaultResponse,
+  createDataVaultResponseSchema,
+  deleteDataVaultResponseSchema
+} from './schemas';
 
 class DataVault {
   private readonly requester: AzulRequester;
@@ -15,28 +23,32 @@ class DataVault {
    * Con esta transacción se solicita un token para ser utilizado en sustitución de la tarjeta,
    * sin necesidad de realizar una venta.
    */
-  async create(input: CreateInput): Promise<DataVaultResponse> {
-    return await this.requester.safeRequest(
-      Create.parse({
+  async create(input: CreateDataVault): Promise<CreateDataVaultResponse> {
+    const response = await this.requester.safeRequest(
+      createDataVaultSchema.parse({
         ...input,
         trxType: 'CREATE'
       }),
       Process.Datavault
     );
+
+    return createDataVaultResponseSchema.parse(response);
   }
 
   /**
    * ### Delete: Eliminación de Token de Bóveda de Datos (DataVault)
    * Con esta transacción se solicita la eliminación de un token de la Bóveda de Datos.
    */
-  async delete(input: DeleteInput): Promise<DataVaultResponse> {
-    return await this.requester.safeRequest(
-      Delete.parse({
+  async delete(input: DeleteDataVault): Promise<DeleteDataVaultResponse> {
+    const response = await this.requester.safeRequest(
+      deleteDataVaultSchema.parse({
         ...input,
         trxType: 'DELETE'
       }),
       Process.Datavault
     );
+
+    return deleteDataVaultResponseSchema.parse(response);
   }
 }
 
