@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { generateOrderNumber } from '../fixtures/order';
 import { azul } from './instance';
 import { describe, expect, it, beforeAll } from 'vitest';
 import 'dotenv/config';
@@ -6,7 +6,7 @@ import { getCard } from '../fixtures/cards';
 import { expectSuccessfulPayment } from '../utils';
 
 describe('Can search a payment', () => {
-  const customOrderId = randomUUID();
+  const customOrderId = generateOrderNumber();
 
   beforeAll(async () => {
     const testCard = getCard('DISCOVER');

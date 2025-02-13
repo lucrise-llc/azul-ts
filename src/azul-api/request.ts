@@ -1,6 +1,7 @@
 import { request, Agent } from 'undici';
 import { capitalizeKeys } from '../utils';
 import { Process } from './processes';
+import { getCertificate } from '../config';
 
 enum AzulURL {
   DEV = 'https://pruebas.azul.com.do/webservices/JSON/Default.aspx',
@@ -62,23 +63,28 @@ class AzulRequester {
       ...body
     });
 
-    const response = await request(url, {
-      method: 'POST',
-      headers: {
-        Auth1: this.auth1,
-        Auth2: this.auth2,
-        'Content-Type': 'application/json'
-      },
-      dispatcher: new Agent({
-        connect: {
-          cert,
-          key
-        }
-      }),
-      body: JSON.stringify(requestBody)
-    });
+    try {
+      const response = await request(url, {
+        method: 'POST',
+        headers: {
+          Auth1: this.auth1,
+          Auth2: this.auth2,
+          'Content-Type': 'application/json'
+        },
+        dispatcher: new Agent({
+          connect: {
+            cert,
+            key
+          }
+        }),
+        body: JSON.stringify(requestBody)
+      });
 
-    return (await response.body.json()) as any;
+      return (await response.body.json()) as any;
+    } catch (error) {
+      console.error('❌ Error during Azul request:', error);
+      throw error;
+    }
   }
 
   private async getCertificates(): Promise<{ cert: string; key: string }> {
@@ -86,10 +92,15 @@ class AzulRequester {
       throw new Error('Missing certificate or key');
     }
 
-    return {
-      cert: this.certificate,
-      key: this.key
-    };
+    try {
+      const cert = getCertificate(this.certificate);
+      const key = getCertificate(this.key);
+      return { cert, key };
+    } catch (error) {
+      throw new Error(
+        `Failed to load certificates: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
   }
 }
 

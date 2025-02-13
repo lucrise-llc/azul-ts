@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { generateOrderNumber } from '../fixtures/order';
 import { azul } from './instance';
 import { describe, expect, it, beforeAll } from 'vitest';
 import 'dotenv/config';
@@ -11,7 +11,7 @@ import {
 } from '../utils';
 
 describe('Can void a payment', () => {
-  const customOrderId = randomUUID();
+  const customOrderId = generateOrderNumber();
   let azulOrderId: string | undefined = undefined;
 
   beforeAll(async () => {
@@ -22,7 +22,8 @@ describe('Can void a payment', () => {
       CVC: testCard.cvv,
       customOrderId,
       amount: 100,
-      ITBIS: 10
+      ITBIS: 10,
+      forceNo3DS: '1'
     });
 
     expect(payment).toBeDefined();

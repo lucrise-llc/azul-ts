@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { generateOrderNumber } from '../fixtures/order';
 import { azul } from './instance';
 import { describe, expect, it } from 'vitest';
 import 'dotenv/config';
@@ -7,7 +7,7 @@ import { expectSuccessfulPayment, expectSuccessfulVerification } from '../utils'
 
 describe('Refund', () => {
   it('Can refund a sale', async () => {
-    const customOrderId = randomUUID();
+    const customOrderId = generateOrderNumber();
     const testCard = getCard('DISCOVER');
 
     const sale = await azul.payments.sale({
@@ -40,7 +40,7 @@ describe('Refund', () => {
   }, 60000);
 
   it('Can refund a post', async () => {
-    const customOrderId = randomUUID();
+    const customOrderId = generateOrderNumber();
     const testCard = getCard('DISCOVER');
 
     const result = await azul.payments.hold({

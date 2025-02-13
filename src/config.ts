@@ -4,7 +4,7 @@
  */
 import { config } from 'dotenv';
 import { readFileSync } from 'fs';
-import { resolve } from 'path';
+import { resolve, isAbsolute } from 'path';
 
 // Load .env file into process.env
 config();
@@ -35,14 +35,14 @@ export function getCertificate(value: string): string {
   const cleanValue = value.replace(/^["']|["']$/g, '').replace(/\\n/g, '\n');
 
   // Check if it's a PEM certificate
-  if (cleanValue.includes('-----BEGIN')) {
+  if (cleanValue.startsWith('-----BEGIN')) {
     return cleanValue;
   }
 
   // Check if it's base64 encoded (try to decode and check if it's a PEM)
   try {
     const decoded = Buffer.from(cleanValue, 'base64').toString();
-    if (decoded.includes('-----BEGIN')) {
+    if (decoded.startsWith('-----BEGIN')) {
       return decoded;
     }
   } catch {
@@ -51,16 +51,12 @@ export function getCertificate(value: string): string {
 
   // Try to read it as a file
   try {
-    // First try as absolute path
-    let fileContent: string;
-    try {
-      fileContent = readFileSync(value, 'utf8');
-    } catch {
-      // If that fails, try as relative to cwd
-      fileContent = readFileSync(resolve(process.cwd(), value), 'utf8');
-    }
+    // Use isAbsolute to check if the path is absolute
+    const filePath = isAbsolute(cleanValue) ? cleanValue : resolve(process.cwd(), cleanValue);
+    const fileContent = readFileSync(filePath, 'utf8');
 
-    if (!fileContent.includes('-----BEGIN')) {
+    // Validate that the file content is a PEM certificate
+    if (!fileContent.startsWith('-----BEGIN')) {
       throw new Error('Invalid certificate format: File does not contain a valid PEM certificate');
     }
     return fileContent;

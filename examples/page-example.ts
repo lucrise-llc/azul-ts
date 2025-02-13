@@ -1,6 +1,6 @@
 import express from 'express';
 import AzulPage from '../src/azul-page';
-
+import { generateOrderNumber } from '../tests/fixtures/order';
 const app = express();
 
 const azul = new AzulPage({
@@ -22,7 +22,7 @@ app.get('/', (req, res) => {
 app.get('/buy-ticket', async (req, res) => {
   res.send(
     azul.createForm({
-      orderNumber: '1234',
+      orderNumber: generateOrderNumber(),
       amount: 1000,
       ITBIS: 100,
       approvedUrl: 'https://rapidotickets.com/',

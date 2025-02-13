@@ -12,7 +12,8 @@ describe('Can make a payment', () => {
       expiration: testCard.expiration,
       CVC: testCard.cvv,
       amount: 100,
-      ITBIS: 10
+      ITBIS: 10,
+      forceNo3DS: '1'
     });
 
     expect(result).toBeDefined();

@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { generateOrderNumber } from '../fixtures/order';
 import { azul } from './instance';
 import { describe, expect, beforeAll, it } from 'vitest';
 import 'dotenv/config';
@@ -11,7 +11,7 @@ import {
 } from '../utils';
 
 describe('Can hold a payment', () => {
-  const customOrderId = randomUUID();
+  const customOrderId = generateOrderNumber();
   let azulOrderId: string;
 
   beforeAll(async () => {

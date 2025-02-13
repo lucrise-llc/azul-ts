@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { generateOrderNumber } from '../fixtures/order';
 import { describe, expect, it } from 'vitest';
 import { azul } from './instance';
 import { getCard } from '../fixtures/cards';
@@ -30,9 +30,10 @@ describe('Card Behaviors', () => {
         cardNumber: limitedCard.number,
         expiration: limitedCard.expiration,
         CVC: limitedCard.cvv,
-        customOrderId: randomUUID(),
+        customOrderId: generateOrderNumber(),
         amount: 50, // Within the 75 RD$ limit
-        ITBIS: 5
+        ITBIS: 5,
+        forceNo3DS: '1' as '0' | '1' // Explicitly disable 3DS
       });
 
       expect(result).toBeDefined();
@@ -51,7 +52,7 @@ describe('Card Behaviors', () => {
         CVC: expiredCard.cvv,
         amount: 100,
         ITBIS: 10,
-        customOrderId: 'test'
+        customOrderId: generateOrderNumber()
       });
 
       expectValidationError(result, 'VALIDATION_ERROR:ExpirationPassed');
@@ -63,7 +64,7 @@ describe('Card Behaviors', () => {
         cardNumber: testCard.number,
         expiration: '012345', // Invalid format (not a valid date)
         CVC: testCard.cvv,
-        customOrderId: 'expired-test',
+        customOrderId: generateOrderNumber(),
         amount: 100,
         ITBIS: 10
       };

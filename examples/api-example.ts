@@ -1,5 +1,7 @@
 import express from 'express';
 import AzulAPI from '../src/azul-api/api';
+import { TEST_CARDS } from '../tests/fixtures/cards';
+import { generateOrderNumber } from '../tests/fixtures/order';
 import 'dotenv/config';
 
 const app = express();
@@ -13,11 +15,13 @@ const azul = new AzulAPI({
 });
 
 app.get('/buy-ticket', async (req, res) => {
+  const card = TEST_CARDS.VISA_1;
+
   const result = await azul.payments.sale({
-    cardNumber: '6011000990099818',
-    expiration: '202412',
-    CVC: '818',
-    customOrderId: '1234',
+    cardNumber: card.number,
+    expiration: card.expiration,
+    CVC: card.cvv,
+    customOrderId: generateOrderNumber(),
     amount: 1000,
     ITBIS: 100
   });

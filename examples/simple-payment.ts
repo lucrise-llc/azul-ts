@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import 'dotenv/config';
 import AzulAPI from '../src/azul-api/api';
-import { randomUUID } from 'crypto';
+import { generateOrderNumber } from '../tests/fixtures/order';
 import { getCard } from '../tests/fixtures/cards';
 
 /**
@@ -20,7 +20,7 @@ async function processPayment() {
 
     // Test card details
     const testCard = getCard('VISA_TEST_CARD');
-    const orderId = randomUUID();
+    const orderId = generateOrderNumber();
     const amount = 100; // RD$100
     const ITBIS = 10; // RD$10
 

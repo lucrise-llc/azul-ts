@@ -7,6 +7,7 @@ import {
   expectSuccessfulVaultResponse,
   expectSuccessfulVaultDeletion
 } from '../utils';
+import { generateOrderNumber } from '../fixtures/order';
 
 describe('DataVault', () => {
   let dataVaultToken: string;
@@ -29,7 +30,7 @@ describe('DataVault', () => {
   }, 60000);
 
   it('Can make a payment with a DataVault token', async () => {
-    const orderNumber = Date.now().toString().slice(-15);
+    const orderNumber = generateOrderNumber();
     const result = await azul.payments.sale({
       dataVaultToken,
       cardNumber: '',
@@ -63,7 +64,7 @@ describe('DataVault', () => {
   }, 60000);
 
   it('After deleting a DataVault token, it should not be possible to make a payment with it', async () => {
-    const orderNumber = Date.now().toString().slice(-15);
+    const orderNumber = generateOrderNumber();
     const result = await azul.payments.sale({
       dataVaultToken,
       cardNumber: '',

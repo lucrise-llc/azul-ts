@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { generateOrderNumber } from '../fixtures/order';
 import { azul } from './instance';
 import { describe, expect, it } from 'vitest';
 import 'dotenv/config';
@@ -7,7 +7,7 @@ import { expectSuccessfulPayment, expectSuccessfulVerification } from '../utils'
 
 describe('Can post a payment', () => {
   it('Can post a hold', async () => {
-    const customOrderId = randomUUID();
+    const customOrderId = generateOrderNumber();
 
     const testCard = getCard('VISA_TEST_CARD'); // Use specific test card
     const samplePayment = {
@@ -16,7 +16,8 @@ describe('Can post a payment', () => {
       CVC: testCard.cvv,
       customOrderId,
       amount: 100,
-      ITBIS: 10
+      ITBIS: 10,
+      forceNo3DS: '1' as '1' | '0'
     };
 
     const hold = await azul.payments.hold(samplePayment);

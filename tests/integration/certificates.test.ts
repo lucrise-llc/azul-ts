@@ -1,7 +1,7 @@
-import { randomUUID } from 'crypto';
+import { generateOrderNumber } from '../fixtures/order';
 import { describe, expect, it, beforeAll, afterAll } from 'vitest';
 import { resolve } from 'path';
-import { writeFileSync, unlinkSync, mkdirSync, existsSync } from 'fs';
+import { writeFileSync, unlinkSync, mkdirSync, existsSync, readFileSync } from 'fs';
 import AzulAPI from '../../src/azul-api/api';
 import { getRandomCard } from '../fixtures/cards';
 import { expectSuccessfulPayment } from '../utils';
@@ -14,13 +14,29 @@ describe('Certificate handling', () => {
       cardNumber: testCard.number,
       expiration: testCard.expiration,
       CVC: testCard.cvv,
-      customOrderId: randomUUID(),
+      customOrderId: generateOrderNumber(),
       amount: 100,
-      ITBIS: 10
+      ITBIS: 10,
+      forceNo3DS: '1' as '0' | '1'
     };
 
-    const CERT_CONTENT = process.env.AZUL_CERT!;
-    const KEY_CONTENT = process.env.AZUL_KEY!;
+    // Get certificate content, handling both file paths and direct content
+    const getCertContent = (value: string) => {
+      try {
+        // First try to read as a file path
+        const content = readFileSync(value, 'utf8');
+        if (content.includes('-----BEGIN')) {
+          return content;
+        }
+      } catch {
+        // If reading file fails, treat as direct content
+      }
+      // Handle as direct content
+      return value.replace(/\\n/g, '\n');
+    };
+
+    const CERT_CONTENT = getCertContent(process.env.AZUL_CERT!);
+    const KEY_CONTENT = getCertContent(process.env.AZUL_KEY!);
 
     const TEMP_DIR = resolve(__dirname, '../fixtures/certificates');
     const TEMP_CERT_PATH = resolve(TEMP_DIR, 'temp.crt');
@@ -30,6 +46,7 @@ describe('Certificate handling', () => {
       if (!existsSync(TEMP_DIR)) {
         mkdirSync(TEMP_DIR, { recursive: true });
       }
+      // Write properly formatted PEM content
       writeFileSync(TEMP_CERT_PATH, CERT_CONTENT);
       writeFileSync(TEMP_KEY_PATH, KEY_CONTENT);
     });
@@ -63,13 +80,13 @@ describe('Certificate handling', () => {
         auth1: process.env.AUTH1!,
         auth2: process.env.AUTH2!,
         merchantId: process.env.MERCHANT_ID!,
-        certificate: CERT_CONTENT.replace(/\n/g, '\\n'),
-        key: KEY_CONTENT.replace(/\n/g, '\\n')
+        certificate: CERT_CONTENT,
+        key: KEY_CONTENT
       });
 
       const result = await azul.payments.sale({
         ...samplePayment,
-        customOrderId: randomUUID()
+        customOrderId: generateOrderNumber()
       });
 
       expect(result).toBeDefined();
@@ -87,7 +104,7 @@ describe('Certificate handling', () => {
 
       const result = await azul.payments.sale({
         ...samplePayment,
-        customOrderId: randomUUID()
+        customOrderId: generateOrderNumber()
       });
 
       expect(result).toBeDefined();
@@ -95,17 +112,21 @@ describe('Certificate handling', () => {
     }, 60000);
 
     it('Can make payment with base64 encoded certificates', async () => {
+      // First ensure we have proper PEM format before encoding
+      const base64Cert = Buffer.from(CERT_CONTENT).toString('base64');
+      const base64Key = Buffer.from(KEY_CONTENT).toString('base64');
+
       const azul = new AzulAPI({
         auth1: process.env.AUTH1!,
         auth2: process.env.AUTH2!,
         merchantId: process.env.MERCHANT_ID!,
-        certificate: Buffer.from(CERT_CONTENT).toString('base64'),
-        key: Buffer.from(KEY_CONTENT).toString('base64')
+        certificate: base64Cert,
+        key: base64Key
       });
 
       const result = await azul.payments.sale({
         ...samplePayment,
-        customOrderId: randomUUID()
+        customOrderId: generateOrderNumber()
       });
 
       expect(result).toBeDefined();
