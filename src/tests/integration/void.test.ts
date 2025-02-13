@@ -1,48 +1,41 @@
 import { randomUUID } from 'crypto';
-import { describe, expect, it, beforeAll } from 'vitest';
+import { describe, it, beforeAll, assert } from 'vitest';
 
 import { azul } from './instance';
-import { getCard } from '../fixtures/cards';
-import {
-  expectSuccessfulPayment,
-  expectSuccessfulVerification,
-  expectOrderIds,
-  expectSuccessfulVoid
-} from '../utils';
+import { TEST_CARDS } from '../fixtures/cards';
 import 'dotenv/config';
 
 describe('Can void a payment', () => {
   const customOrderId = randomUUID();
-  let azulOrderId: string | undefined = undefined;
+  let azulOrderId: string;
 
   beforeAll(async () => {
-    const testCard = getCard('VISA_TEST_CARD');
+    const card = TEST_CARDS.VISA_TEST_CARD;
+
     const payment = await azul.payments.sale({
-      cardNumber: testCard.number,
-      expiration: testCard.expiration,
-      CVC: testCard.cvv,
+      type: 'card',
+      cardNumber: card.number,
+      expiration: card.expiration,
+      CVC: card.cvv,
       customOrderId,
       amount: 100,
       ITBIS: 10
     });
 
-    expect(payment).toBeDefined();
-    expectSuccessfulPayment(payment);
-    expectOrderIds(payment);
+    assert(payment.type === 'success');
     azulOrderId = payment.AzulOrderId;
-  }, 60000);
+  });
 
   it('After the payment, the TransactionType should be "Sale"', async () => {
     const verifyPayment = await azul.verifyPayment(customOrderId);
-    expectSuccessfulVerification(verifyPayment, 'Sale');
-  }, 60000);
+    assert(verifyPayment.TransactionType === 'Sale');
+  });
 
   it("Should update transaction type to 'Void' after successful void operation", async () => {
-    const voidResponse = await azul.void(azulOrderId!);
-    expect(voidResponse).toBeDefined();
-    expectSuccessfulVoid(voidResponse);
+    const voidResponse = await azul.void(azulOrderId);
+    assert(voidResponse.type === 'success');
 
     const verifyPayment = await azul.verifyPayment(customOrderId);
-    expectSuccessfulVerification(verifyPayment, 'Void');
-  }, 60000);
+    assert(verifyPayment.TransactionType === 'Void');
+  });
 });
