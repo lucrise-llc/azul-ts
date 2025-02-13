@@ -1,9 +1,9 @@
 import { Process } from './processes';
 import { Secure } from './secure/secure';
-import { parsePEM } from './parse-certificate';
 import DataVault from './data-vault/data-vault';
 import AzulRequester, { Config } from './request';
 import ProcessPayment from './process-payment/process-payment';
+import { parsePEM } from './parse-certificate/parse-certificate';
 import {
   PostSchema,
   PostSchemaInput,
