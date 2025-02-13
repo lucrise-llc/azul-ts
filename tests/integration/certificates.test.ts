@@ -5,6 +5,7 @@ import { writeFileSync, unlinkSync, mkdirSync, existsSync } from 'fs';
 import AzulAPI from '../../src/api';
 import { getRandomCard } from '../fixtures/cards';
 import { expectSuccessfulPayment } from '../utils';
+import { PEMError } from '../../src/parse-certificate';
 import 'dotenv/config';
 
 describe('Certificate handling', () => {
@@ -125,7 +126,7 @@ describe('Certificate handling', () => {
         });
         expect.fail('Should have thrown an error');
       } catch (error) {
-        expect(error.message).toMatch(/Certificate error/);
+        expect(error instanceof PEMError).toBe(true);
       }
     });
 
@@ -140,7 +141,7 @@ describe('Certificate handling', () => {
         });
         expect.fail('Should have thrown an error');
       } catch (error) {
-        expect(error.message).toMatch(/Certificate error/);
+        expect(error instanceof PEMError).toBe(true);
       }
     });
   });

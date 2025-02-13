@@ -11,7 +11,7 @@ import ProcessPayment from './process-payment/process-payment';
 import { ProcessPaymentResponse } from './process-payment/types';
 import { Process } from './processes';
 import { Secure } from './secure/secure';
-import { getCertificate } from './config';
+import { parsePEM } from './parse-certificate';
 
 class AzulAPI {
   private requester: AzulRequester;
@@ -23,24 +23,15 @@ class AzulAPI {
   public key: string;
 
   constructor(config: Config) {
-    try {
-      const validatedConfig = {
-        ...config,
-        certificate: getCertificate(config.certificate),
-        key: getCertificate(config.key)
-      };
+    config.key = parsePEM(config.key, 'key');
+    config.certificate = parsePEM(config.certificate, 'certificate');
 
-      this.requester = new AzulRequester(validatedConfig);
-      this.vault = new DataVault(this.requester);
-      this.payments = new ProcessPayment(this.requester);
-      this.secure = new Secure(this.requester);
-      this.certificate = validatedConfig.certificate;
-      this.key = validatedConfig.key;
-    } catch (error) {
-      throw new Error(
-        `Certificate error: ${error instanceof Error ? error.message : String(error)}`
-      );
-    }
+    this.requester = new AzulRequester(config);
+    this.vault = new DataVault(this.requester);
+    this.payments = new ProcessPayment(this.requester);
+    this.secure = new Secure(this.requester);
+    this.certificate = config.certificate;
+    this.key = config.key;
   }
 
   /**
