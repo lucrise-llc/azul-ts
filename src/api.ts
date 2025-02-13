@@ -11,7 +11,7 @@ import ProcessPayment from './process-payment/process-payment';
 import { ProcessPaymentResponse } from './process-payment/types';
 import { Process } from './processes';
 import { Secure } from './secure/secure';
-import { getCertificate } from '../config';
+import { getCertificate } from './config';
 
 class AzulAPI {
   private requester: AzulRequester;

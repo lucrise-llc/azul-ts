@@ -4,7 +4,7 @@ import { ProcessPaymentSchema } from '../process-payment/schemas';
 import { Process } from '../processes';
 import AzulRequester from '../request';
 import { MethodNotificationStatus, SecureSale } from './types';
-import { sleep } from '../../utils';
+import { sleep } from '../utils';
 
 type SecurePaymentSession = {
   azulOrderId: string;

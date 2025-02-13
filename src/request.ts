@@ -1,5 +1,5 @@
 import { request, Agent } from 'undici';
-import { capitalizeKeys } from '../utils';
+import { capitalizeKeys } from './utils';
 import { Process } from './processes';
 
 enum AzulURL {

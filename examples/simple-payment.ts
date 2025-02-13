@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import 'dotenv/config';
-import AzulAPI from '../src/azul-api/api';
+import AzulAPI from '../src/api';
 import { randomUUID } from 'crypto';
 import { getCard } from '../tests/fixtures/cards';
 

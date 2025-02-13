@@ -1,5 +1,5 @@
 import express from 'express';
-import AzulAPI from '../src/azul-api/api';
+import AzulAPI from '../src/api';
 import 'dotenv/config';
 
 const app = express();

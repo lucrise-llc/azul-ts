@@ -1,7 +1,6 @@
-import AzulPage from './azul-page';
-import AzulAPI from './azul-api/api';
+import AzulAPI from './api';
 
-export { AzulPage, AzulAPI };
-export * from './azul-api/secure/types';
-export * from './azul-api/process-payment/types';
-export * from './azul-api/data-vault/types';
+export { AzulAPI };
+export * from './secure/types';
+export * from './process-payment/types';
+export * from './data-vault/types';

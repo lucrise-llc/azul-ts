@@ -1,4 +1,4 @@
-import AzulAPI from '../../src/azul-api/api';
+import AzulAPI from '../../src/api';
 import { CONFIG } from '../../src/config';
 
 export const azul = new AzulAPI({

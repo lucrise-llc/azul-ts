@@ -1,6 +1,6 @@
 import express from 'express';
-import AzulAPI from '../src/azul-api/api';
-import { ChallengeIndicator } from '../src/azul-api/secure/types';
+import AzulAPI from '../src/api';
+import { ChallengeIndicator } from '../src/secure/types';
 import 'dotenv/config';
 
 const app = express();
