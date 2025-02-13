@@ -60,7 +60,7 @@ describe('Refund', () => {
       amount: 100,
       ITBIS: 10
     });
-    console.log('post: ', post);
+
     assert(post.type === 'success');
 
     const refund = await azul.payments.refund({
