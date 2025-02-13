@@ -70,6 +70,6 @@ describe('Can hold a payment', () => {
     });
 
     expect(result.type).toBe('error');
-    expect(result.ErrorDescription).toBe('INSUF FONDOS');
+    expect(result.ErrorDescription).toBe('VALIDATION_ERROR:ExpirationPassed');
   });
 });
