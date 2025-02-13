@@ -37,13 +37,13 @@ describe('DataVault', () => {
   });
 
   it('After deleting a DataVault token, it should not be possible to make a payment with it', async () => {
-    const promise = azul.payments.sale({
+    const response = await azul.payments.sale({
       type: 'token',
       dataVaultToken,
       amount: 100,
       ITBIS: 10
     });
 
-    await expect(promise).rejects.toThrow();
+    expect(response.type).toBe('error');
   });
 });

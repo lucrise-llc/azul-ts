@@ -46,7 +46,8 @@ const successfulPaymentResponseSchema = z
     DateTime: z.string().nonempty(),
     ErrorDescription: z.literal(''),
     LotNumber: z.string(),
-    RRN: z.string().nonempty(),
+    // RRN is always present except for post (empty string)
+    RRN: z.string(),
     ResponseCode: z.literal('ISO8583'),
     Ticket: z.string()
   })
@@ -110,3 +111,10 @@ export type ProcessPaymentInput = z.input<typeof processPaymentSchema>;
 export type RefundRequestInput = z.input<typeof refundRequestSchema>;
 export type RefundResponse = z.infer<typeof refundResponseSchema>;
 export type PaymentResponse = z.infer<typeof paymentResponseSchema>;
+
+export const verifySchema = z.object({
+  Found: z.boolean(),
+  TransactionType: z.string()
+});
+
+export type VerifyResponse = z.infer<typeof verifySchema>;

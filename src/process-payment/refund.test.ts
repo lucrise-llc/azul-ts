@@ -60,8 +60,8 @@ describe('Refund', () => {
       amount: 100,
       ITBIS: 10
     });
-
-    expect(post.IsoCode).toBe('00');
+    console.log('post: ', post);
+    assert(post.type === 'success');
 
     const refund = await azul.payments.refund({
       type: 'card',

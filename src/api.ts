@@ -4,7 +4,6 @@ import { parsePEM } from './parse-certificate';
 import DataVault from './data-vault/data-vault';
 import AzulRequester, { Config } from './request';
 import ProcessPayment from './process-payment/process-payment';
-import { ProcessPaymentResponse } from './process-payment/types';
 import {
   PostSchema,
   PostSchemaInput,
@@ -12,6 +11,12 @@ import {
   SearchSchema,
   SearchSchemaInput
 } from './schemas';
+import {
+  PaymentResponse,
+  paymentResponseSchema,
+  verifySchema,
+  VerifyResponse
+} from './process-payment/schemas';
 
 class AzulAPI {
   private requester: AzulRequester;
@@ -41,8 +46,9 @@ class AzulAPI {
    * Las transacciones de hold que no han sido posteadas no tienen límite de tiempo para
    * anularse.
    */
-  async void(azulOrderId: string): Promise<ProcessPaymentResponse> {
-    return await this.requester.safeRequest({ azulOrderId }, Process.Void);
+  async void(azulOrderId: string): Promise<PaymentResponse> {
+    const response = await this.requester.safeRequest({ azulOrderId }, Process.Void);
+    return paymentResponseSchema.parse(response);
   }
 
   /**
@@ -52,8 +58,9 @@ class AzulAPI {
    * monto del Post sea menor al Hold, se envía un mensaje de reverso para liberar los
    * fondos retenidos a la tarjeta.
    */
-  async post(input: PostSchemaInput): Promise<ProcessPaymentResponse> {
-    return await this.requester.safeRequest(PostSchema.parse(input), Process.Post);
+  async post(input: PostSchemaInput): Promise<PaymentResponse> {
+    const response = await this.requester.safeRequest(PostSchema.parse(input), Process.Post);
+    return paymentResponseSchema.parse(response);
   }
 
   /**
@@ -64,13 +71,9 @@ class AzulAPI {
    * Si existe más de una transacción con este identificador este método devolverá los
    * valores de la última transacción (más reciente) de ellas.
    */
-  async verifyPayment(customOrderId: string): Promise<
-    ProcessPaymentResponse & {
-      Found?: boolean;
-      TransactionType?: string;
-    }
-  > {
-    return await this.requester.safeRequest({ customOrderId }, Process.VerifyPayment);
+  async verifyPayment(customOrderId: string): Promise<VerifyResponse> {
+    const response = await this.requester.safeRequest({ customOrderId }, Process.VerifyPayment);
+    return verifySchema.parse(response);
   }
 
   /**
@@ -79,7 +82,11 @@ class AzulAPI {
    * previamente seleccionado.
    */
   async search(input: SearchSchemaInput): Promise<SearchResponse> {
-    return await this.requester.safeRequest(SearchSchema.parse(input), Process.SearchPayments);
+    const response = await this.requester.safeRequest(
+      SearchSchema.parse(input),
+      Process.SearchPayments
+    );
+    return paymentResponseSchema.parse(response);
   }
 }
 
