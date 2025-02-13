@@ -1,15 +1,13 @@
 import { z } from 'zod';
 
-import { CVC, cardNumber, expiration, channel } from '../schemas';
+import { CVC, cardNumber, expiration } from '../schemas';
 
 export const createDataVaultSchema = z.object({
-  channel,
-  store: z.string().max(11),
   cardNumber,
   expiration,
   CVC,
-  trxType: z.literal('CREATE'),
-  saveToDataVault: z.literal('1')
+  trxType: z.literal('CREATE').default('CREATE'),
+  saveToDataVault: z.literal('1').default('1')
 });
 
 export const createDataVaultResponseSchema = z.object({
@@ -24,10 +22,8 @@ export const createDataVaultResponseSchema = z.object({
 });
 
 export const deleteDataVaultSchema = z.object({
-  channel,
-  store: z.string().max(11),
   dataVaultToken: z.string().max(36),
-  trxType: z.literal('DELETE')
+  trxType: z.literal('DELETE').default('DELETE')
 });
 
 export const deleteDataVaultResponseSchema = z.object({
