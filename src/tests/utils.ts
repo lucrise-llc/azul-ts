@@ -1,7 +1,7 @@
 import { expect } from 'vitest';
 
-import type { DataVaultResponse } from '../src/data-vault/types';
-import type { ProcessPaymentResponse } from '../src/process-payment/types';
+import type { DataVaultResponse } from '../data-vault/types';
+import type { ProcessPaymentResponse } from '../process-payment/types';
 
 // Since we don't have direct access to VerifyPaymentResponse type, we'll define it
 interface VerifyPaymentResponse extends Partial<ProcessPaymentResponse> {
@@ -131,37 +131,6 @@ export function expectOrderIds(result: ProcessPaymentResponse) {
   if (result.CustomOrderId) {
     expect(result.CustomOrderId).not.toBe('');
   }
-}
-
-/**
- * Helper to expect a successful DataVault token creation response
- */
-export function expectSuccessfulVaultResponse(result: DataVaultResponse) {
-  if (isTemporaryError(result)) {
-    console.warn('⚠️ Received temporary error (91), skipping vault check');
-    return;
-  }
-
-  expect(result).toMatchObject<Partial<VaultSuccessResponse>>({
-    IsoCode: '00',
-    DataVaultToken: expect.any(String),
-    Expiration: expect.any(String)
-  });
-}
-
-/**
- * Helper to expect a successful DataVault token deletion response
- */
-export function expectSuccessfulVaultDeletion(result: DataVaultResponse) {
-  if (isTemporaryError(result)) {
-    console.warn('⚠️ Received temporary error (91), skipping vault deletion check');
-    return;
-  }
-
-  expect(result).toMatchObject<Partial<VaultDeleteResponse>>({
-    IsoCode: '00',
-    ResponseMessage: 'APROBADA'
-  });
 }
 
 /**

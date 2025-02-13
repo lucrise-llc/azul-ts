@@ -3,10 +3,10 @@ import { randomUUID } from 'crypto';
 import { describe, expect, it, beforeAll, afterAll } from 'vitest';
 import { writeFileSync, unlinkSync, mkdirSync, existsSync } from 'fs';
 
-import AzulAPI from '../../src/api';
+import AzulAPI from '../../api';
 import { getRandomCard } from '../fixtures/cards';
 import { expectSuccessfulPayment } from '../utils';
-import { PEMError } from '../../src/parse-certificate';
+import { PEMError } from '../../parse-certificate';
 import 'dotenv/config';
 
 describe('Certificate handling', () => {
