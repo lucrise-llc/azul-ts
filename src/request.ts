@@ -26,6 +26,7 @@ class AzulRequester {
   private merchantId: string;
   private certificate: string;
   private key: string;
+  private readonly agent: Agent;
 
   constructor(config: Config) {
     this.auth1 = config.auth1;
@@ -45,16 +46,20 @@ class AzulRequester {
     } else {
       this.url = AzulURL.PROD;
     }
-  }
 
+    this.agent = new Agent({
+      connect: {
+        cert: this.certificate,
+        key: this.key
+      }
+    });
+  }
   async safeRequest(body: any, process?: Process) {
     let url = this.url;
 
     if (process) {
       url = url + '?' + process;
     }
-
-    const { cert, key } = await this.getCertificates();
 
     const requestBody = capitalizeKeys({
       channel: this.channel,
@@ -69,27 +74,11 @@ class AzulRequester {
         Auth2: this.auth2,
         'Content-Type': 'application/json'
       },
-      dispatcher: new Agent({
-        connect: {
-          cert,
-          key
-        }
-      }),
+      dispatcher: this.agent,
       body: JSON.stringify(requestBody)
     });
 
     return (await response.body.json()) as any;
-  }
-
-  private async getCertificates(): Promise<{ cert: string; key: string }> {
-    if (!this.certificate || !this.key) {
-      throw new Error('Missing certificate or key');
-    }
-
-    return {
-      cert: this.certificate,
-      key: this.key
-    };
   }
 }
 
