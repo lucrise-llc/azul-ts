@@ -22,9 +22,8 @@ describe('DataVault', () => {
 
   it('Can make a payment with a DataVault token', async () => {
     const result = await azul.payments.sale({
+      type: 'token',
       dataVaultToken,
-      cardNumber: '',
-      expiration: '',
       amount: 100,
       ITBIS: 10
     });
@@ -38,14 +37,13 @@ describe('DataVault', () => {
   });
 
   it('After deleting a DataVault token, it should not be possible to make a payment with it', async () => {
-    const result = await azul.payments.sale({
+    const promise = azul.payments.sale({
+      type: 'token',
       dataVaultToken,
-      cardNumber: '',
-      expiration: '',
       amount: 100,
       ITBIS: 10
     });
 
-    expect(result.IsoCode).not.toBe('00');
+    await expect(promise).rejects.toThrow();
   });
 });

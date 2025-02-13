@@ -9,7 +9,6 @@ export const expiration = z.string().length(6).optional();
 export const CVC = z.string().length(3).optional();
 export const posInputMode = z.string().max(10).optional().default('E-Commerce');
 export const orderNumber = z.string().max(15).optional();
-export const acquirerRefData = z.enum(['0', '1']).optional().default('1');
 export const customerServicePhone = z.string().max(32).optional();
 export const ECommerceURL = z.string().max(32).optional();
 export const customOrderId = z.string().max(75).optional();
