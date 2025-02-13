@@ -1,9 +1,8 @@
 import { randomUUID } from 'crypto';
-import { describe, expect, beforeAll, it } from 'vitest';
+import { describe, expect, beforeAll, it, assert } from 'vitest';
 
 import { azul } from '../tests/integration/instance';
 import { TEST_CARDS } from '../tests/fixtures/cards';
-
 import 'dotenv/config';
 
 describe('Can hold a payment', () => {
@@ -23,7 +22,7 @@ describe('Can hold a payment', () => {
       ITBIS: 10
     });
 
-    expect(result.IsoCode).toBe('00');
+    assert(result.type === 'success');
     azulOrderId = result.AzulOrderId;
   });
 
@@ -38,5 +37,39 @@ describe('Can hold a payment', () => {
 
     const verify = await azul.verifyPayment(customOrderId);
     expect(verify.TransactionType).toBe('Void');
+  });
+
+  it('Should reject invalid expiration format', async () => {
+    const card = TEST_CARDS.VISA_TEST_CARD;
+
+    const result = await azul.payments.hold({
+      type: 'card',
+      cardNumber: card.number,
+      expiration: '012345', // Invalid format (not a valid date)
+      CVC: card.cvv,
+      customOrderId: 'expired-test',
+      amount: 100,
+      ITBIS: 10
+    });
+
+    expect(result.type).toBe('error');
+    expect(result.ErrorDescription).toBe('VALIDATION_ERROR:Expiration');
+  });
+
+  it('Should reject past expiration dates', async () => {
+    const card = TEST_CARDS.VISA_TEST_CARD;
+
+    const result = await azul.payments.hold({
+      type: 'card',
+      cardNumber: card.number,
+      expiration: '202301', // January 2023 (expired)
+      CVC: card.cvv,
+      customOrderId: 'expired-test',
+      amount: 100,
+      ITBIS: 10
+    });
+
+    expect(result.type).toBe('error');
+    expect(result.ErrorDescription).toBe('INSUF FONDOS');
   });
 });

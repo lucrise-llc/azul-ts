@@ -1,12 +1,13 @@
 import AzulRequester from '../request';
 import {
   processPaymentSchema,
-  SuccessfulPaymentResponse,
-  successfulPaymentResponseSchema,
+  PaymentResponse,
+  paymentResponseSchema,
   ProcessPaymentInput,
   refundRequestSchema,
   RefundRequestInput,
-  refundResponseSchema
+  refundResponseSchema,
+  RefundResponse
 } from './schemas';
 
 export enum ProcessPaymentTransaction {
@@ -33,13 +34,13 @@ class ProcessPayment {
    * Luego de transcurridos estos 20 minutos, la transacción será liquidada y se debe realizar
    * una transacción de “Refund” o devolución para devolver los fondos a la tarjeta.
    */
-  async sale(input: ProcessPaymentInput): Promise<SuccessfulPaymentResponse> {
+  async sale(input: ProcessPaymentInput): Promise<PaymentResponse> {
     const response = await this.requester.safeRequest({
       ...processPaymentSchema.parse(input),
       trxType: ProcessPaymentTransaction.SALE
     });
 
-    return successfulPaymentResponseSchema.parse(response);
+    return paymentResponseSchema.parse(response);
   }
 
   /**
@@ -57,7 +58,7 @@ class ProcessPayment {
    * El límite de tiempo para procesar una devolución es de 6 meses transcurridos
    * después de la transacción original.
    */
-  async refund(input: RefundRequestInput): Promise<SuccessfulPaymentResponse> {
+  async refund(input: RefundRequestInput): Promise<RefundResponse> {
     const response = await this.requester.safeRequest({
       ...refundRequestSchema.parse(input),
       trxType: ProcessPaymentTransaction.REFUND
@@ -84,14 +85,14 @@ class ProcessPayment {
    * monto mayor no debe sobrepasar el 15% del monto original.
    * 5. El Void libera o cancela los fondos retenidos.
    */
-  async hold(input: ProcessPaymentInput): Promise<SuccessfulPaymentResponse> {
+  async hold(input: ProcessPaymentInput): Promise<PaymentResponse> {
     const response = await this.requester.safeRequest({
       ...processPaymentSchema.parse(input),
       trxType: ProcessPaymentTransaction.HOLD,
       acquirerRefData: '1'
     });
 
-    return successfulPaymentResponseSchema.parse(response);
+    return paymentResponseSchema.parse(response);
   }
 }
 

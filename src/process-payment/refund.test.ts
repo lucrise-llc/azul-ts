@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto';
-import { describe, expect, it } from 'vitest';
+import { assert, describe, expect, it } from 'vitest';
 
 import { azul } from '../tests/integration/instance';
 import { TEST_CARDS } from '../tests/fixtures/cards';
@@ -21,7 +21,7 @@ describe('Refund', () => {
       ITBIS: 10
     });
 
-    expect(sale.IsoCode).toBe('00');
+    assert(sale.type === 'success');
 
     const refund = await azul.payments.refund({
       type: 'card',
@@ -53,7 +53,7 @@ describe('Refund', () => {
       ITBIS: 10
     });
 
-    expect(result.IsoCode).toBe('00');
+    assert(result.type === 'success');
 
     const post = await azul.post({
       azulOrderId: result.AzulOrderId,
