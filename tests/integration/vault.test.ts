@@ -1,12 +1,13 @@
-import { azul } from './instance';
 import { describe, expect, it } from 'vitest';
-import 'dotenv/config';
+
+import { azul } from './instance';
 import { getCard } from '../fixtures/cards';
 import {
   expectSuccessfulPayment,
   expectSuccessfulVaultResponse,
   expectSuccessfulVaultDeletion
 } from '../utils';
+import 'dotenv/config';
 
 describe('DataVault', () => {
   let dataVaultToken: string;

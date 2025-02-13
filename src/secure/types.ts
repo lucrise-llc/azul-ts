@@ -1,4 +1,5 @@
 import { z } from 'zod';
+
 import type { ProcessPaymentSchema } from '../process-payment/schemas';
 
 export type SecureSale = z.infer<typeof ProcessPaymentSchema> & {

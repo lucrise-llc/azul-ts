@@ -1,6 +1,7 @@
-import type { ProcessPaymentResponse } from '../src/azul-api/process-payment/types';
-import type { DataVaultResponse } from '../src/azul-api/data-vault/types';
 import { expect } from 'vitest';
+
+import type { DataVaultResponse } from '../src/data-vault/types';
+import type { ProcessPaymentResponse } from '../src/process-payment/types';
 
 // Since we don't have direct access to VerifyPaymentResponse type, we'll define it
 interface VerifyPaymentResponse extends Partial<ProcessPaymentResponse> {

@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto';
 import { describe, expect, it } from 'vitest';
+
 import { azul } from './instance';
 import { getCard } from '../fixtures/cards';
 import { expectSuccessfulPayment, expectValidationError } from '../utils';

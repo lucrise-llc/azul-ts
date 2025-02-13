@@ -1,6 +1,7 @@
 import { request, Agent } from 'undici';
-import { capitalizeKeys } from './utils';
+
 import { Process } from './processes';
+import { capitalizeKeys } from './utils';
 
 enum AzulURL {
   DEV = 'https://pruebas.azul.com.do/webservices/JSON/Default.aspx',
@@ -54,7 +55,8 @@ class AzulRequester {
       }
     });
   }
-  async safeRequest(body: any, process?: Process) {
+
+  async safeRequest(body: Record<string, unknown>, process?: Process): Promise<unknown> {
     let url = this.url;
 
     if (process) {
@@ -78,7 +80,7 @@ class AzulRequester {
       body: JSON.stringify(requestBody)
     });
 
-    return (await response.body.json()) as any;
+    return await response.body.json();
   }
 }
 

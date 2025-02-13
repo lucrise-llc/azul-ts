@@ -1,7 +1,8 @@
+import { resolve } from 'path';
 import { randomUUID } from 'crypto';
 import { describe, expect, it, beforeAll, afterAll } from 'vitest';
-import { resolve } from 'path';
 import { writeFileSync, unlinkSync, mkdirSync, existsSync } from 'fs';
+
 import AzulAPI from '../../src/api';
 import { getRandomCard } from '../fixtures/cards';
 import { expectSuccessfulPayment } from '../utils';

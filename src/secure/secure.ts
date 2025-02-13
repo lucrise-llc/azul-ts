@@ -1,10 +1,11 @@
 import { randomUUID } from 'crypto';
-import { ProcessPaymentTransaction } from '../process-payment/process-payment';
-import { ProcessPaymentSchema } from '../process-payment/schemas';
+
+import { sleep } from '../utils';
 import { Process } from '../processes';
 import AzulRequester from '../request';
 import { MethodNotificationStatus, SecureSale } from './types';
-import { sleep } from '../utils';
+import { ProcessPaymentSchema } from '../process-payment/schemas';
+import { ProcessPaymentTransaction } from '../process-payment/process-payment';
 
 type SecurePaymentSession = {
   azulOrderId: string;

@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
-import { azul } from './instance';
 import { describe, expect, it, beforeAll } from 'vitest';
-import 'dotenv/config';
+
+import { azul } from './instance';
 import { getCard } from '../fixtures/cards';
 import {
   expectSuccessfulPayment,
@@ -9,6 +9,7 @@ import {
   expectOrderIds,
   expectSuccessfulVoid
 } from '../utils';
+import 'dotenv/config';
 
 describe('Can void a payment', () => {
   const customOrderId = randomUUID();

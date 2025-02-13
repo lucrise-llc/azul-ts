@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { config } from 'dotenv';
+
 import AzulAPI from '../../src/api';
 
 config();

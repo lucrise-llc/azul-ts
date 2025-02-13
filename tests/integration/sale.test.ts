@@ -1,8 +1,9 @@
-import { azul } from './instance';
 import { describe, expect, it } from 'vitest';
-import 'dotenv/config';
+
+import { azul } from './instance';
 import { getCard } from '../fixtures/cards';
 import { expectSuccessfulPayment } from '../utils';
+import 'dotenv/config';
 
 describe('Can make a payment', () => {
   it('Can make a payment', async () => {

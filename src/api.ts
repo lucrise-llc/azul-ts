@@ -1,3 +1,10 @@
+import { Process } from './processes';
+import { Secure } from './secure/secure';
+import { parsePEM } from './parse-certificate';
+import DataVault from './data-vault/data-vault';
+import AzulRequester, { Config } from './request';
+import ProcessPayment from './process-payment/process-payment';
+import { ProcessPaymentResponse } from './process-payment/types';
 import {
   PostSchema,
   PostSchemaInput,
@@ -5,13 +12,6 @@ import {
   SearchSchema,
   SearchSchemaInput
 } from './schemas';
-import AzulRequester, { Config } from './request';
-import DataVault from './data-vault/data-vault';
-import ProcessPayment from './process-payment/process-payment';
-import { ProcessPaymentResponse } from './process-payment/types';
-import { Process } from './processes';
-import { Secure } from './secure/secure';
-import { parsePEM } from './parse-certificate';
 
 class AzulAPI {
   private requester: AzulRequester;

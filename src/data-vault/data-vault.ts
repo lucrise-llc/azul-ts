@@ -1,7 +1,7 @@
 import { Process } from '../processes';
 import AzulRequester from '../request';
-import { CreateInput, DataVaultResponse, DeleteInput } from './types';
 import { Create, Delete } from './schemas';
+import { CreateInput, DataVaultResponse, DeleteInput } from './types';
 
 class DataVault {
   private readonly requester: AzulRequester;
