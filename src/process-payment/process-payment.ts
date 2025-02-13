@@ -1,6 +1,13 @@
 import AzulRequester from '../request';
-import { ProcessPaymentSchema, RefundSchema } from './schemas';
-import { ProcessPaymentResponse, ProcessPaymentSchemaInput, RefundSchemaInput } from './types';
+import {
+  processPaymentSchema,
+  SuccessfulPaymentResponse,
+  successfulPaymentResponseSchema,
+  ProcessPaymentInput,
+  refundRequestSchema,
+  RefundRequestInput,
+  refundResponseSchema
+} from './schemas';
 
 export enum ProcessPaymentTransaction {
   SALE = 'Sale',
@@ -26,11 +33,13 @@ class ProcessPayment {
    * Luego de transcurridos estos 20 minutos, la transacción será liquidada y se debe realizar
    * una transacción de “Refund” o devolución para devolver los fondos a la tarjeta.
    */
-  async sale(input: ProcessPaymentSchemaInput): Promise<ProcessPaymentResponse> {
-    return await this.requester.safeRequest({
-      ...ProcessPaymentSchema.parse(input),
+  async sale(input: ProcessPaymentInput): Promise<SuccessfulPaymentResponse> {
+    const response = await this.requester.safeRequest({
+      ...processPaymentSchema.parse(input),
       trxType: ProcessPaymentTransaction.SALE
     });
+
+    return successfulPaymentResponseSchema.parse(response);
   }
 
   /**
@@ -48,11 +57,13 @@ class ProcessPayment {
    * El límite de tiempo para procesar una devolución es de 6 meses transcurridos
    * después de la transacción original.
    */
-  async refund(input: RefundSchemaInput): Promise<ProcessPaymentResponse> {
-    return await this.requester.safeRequest({
-      ...RefundSchema.parse(input),
+  async refund(input: RefundRequestInput): Promise<SuccessfulPaymentResponse> {
+    const response = await this.requester.safeRequest({
+      ...refundRequestSchema.parse(input),
       trxType: ProcessPaymentTransaction.REFUND
     });
+
+    return refundResponseSchema.parse(response);
   }
 
   /**
@@ -73,11 +84,14 @@ class ProcessPayment {
    * monto mayor no debe sobrepasar el 15% del monto original.
    * 5. El Void libera o cancela los fondos retenidos.
    */
-  async hold(input: ProcessPaymentSchemaInput): Promise<ProcessPaymentResponse> {
-    return await this.requester.safeRequest({
-      ...ProcessPaymentSchema.parse(input),
-      trxType: ProcessPaymentTransaction.HOLD
+  async hold(input: ProcessPaymentInput): Promise<SuccessfulPaymentResponse> {
+    const response = await this.requester.safeRequest({
+      ...processPaymentSchema.parse(input),
+      trxType: ProcessPaymentTransaction.HOLD,
+      acquirerRefData: '1'
     });
+
+    return successfulPaymentResponseSchema.parse(response);
   }
 }
 
