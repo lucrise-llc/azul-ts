@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
-import type { processPaymentSchema } from '../process-payment/schemas';
+import type { saleRequestSchema } from '../sale/schemas';
 
-export type SecureSale = z.infer<typeof processPaymentSchema> & {
+export type SecureSale = z.infer<typeof saleRequestSchema> & {
   cardHolderInfo: Partial<CardHolderInfo>;
   browserInfo: Partial<BrowserInfo>;
   threeDSAuth: ThreeDSAuth;

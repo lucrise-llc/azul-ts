@@ -1,11 +1,9 @@
 import { randomUUID } from 'crypto';
 
 import { sleep } from '../utils';
-import { Process } from '../processes';
 import AzulRequester from '../request';
+import { saleRequestSchema } from '../sale/schemas';
 import { MethodNotificationStatus, SecureSale } from './types';
-import { processPaymentSchema } from '../process-payment/schemas';
-import { ProcessPaymentTransaction } from '../process-payment/process-payment';
 
 type SecurePaymentSession = {
   azulOrderId: string;
@@ -36,7 +34,7 @@ export class Secure {
     const secureId = randomUUID();
 
     const result = await this.requester.safeRequest({
-      ...processPaymentSchema.parse(input),
+      ...saleRequestSchema.parse(input),
       forceNo3DS: '0',
       cardHolderInfo: input.cardHolderInfo,
       browserInfo: input.browserInfo,
@@ -45,7 +43,7 @@ export class Secure {
         TermUrl: input.threeDSAuth.TermUrl + `?id=${secureId}`,
         MethodNotificationUrl: input.threeDSAuth.MethodNotificationUrl + `?id=${secureId}`
       },
-      trxType: ProcessPaymentTransaction.SALE
+      trxType: 'Sale'
     });
 
     if (result.ResponseMessage === '3D_SECURE_CHALLENGE') {
@@ -100,7 +98,7 @@ export class Secure {
         azulOrderId: input.azulOrderId,
         methodNotificationStatus: input.methodNotificationStatus
       },
-      Process.Process3DsMethod
+      'ProcessThreedsMethod'
     );
   }
 
@@ -123,7 +121,7 @@ export class Secure {
         azulOrderId: input.azulOrderId,
         cRes: input.cRes
       },
-      Process.Process3DsChallenge
+      'ProcessThreedsChallenge'
     );
   }
 

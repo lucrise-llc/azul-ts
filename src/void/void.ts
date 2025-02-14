@@ -1,4 +1,3 @@
-import { Process } from '../processes';
 import AzulRequester from '../request';
 import { SaleResponse, saleResponseSchema } from '../sale/schemas';
 
@@ -13,6 +12,6 @@ export async function voidTransaction(
   azulOrderId: string,
   requester: AzulRequester
 ): Promise<SaleResponse> {
-  const response = await requester.safeRequest({ azulOrderId }, Process.Void);
+  const response = await requester.safeRequest({ azulOrderId }, 'ProcessVoid');
   return saleResponseSchema.parse(response);
 }
