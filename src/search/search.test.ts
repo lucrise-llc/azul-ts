@@ -1,15 +1,14 @@
 import { randomUUID } from 'crypto';
-import { describe, expect, it, beforeAll, assert } from 'vitest';
+import { describe, expect, it, assert } from 'vitest';
 
 import { azul } from '../tests/instance';
 import { TEST_CARDS } from '../tests/fixtures/cards';
 import 'dotenv/config';
 
 describe('Can search a payment', () => {
-  const customOrderId = randomUUID();
-
-  beforeAll(async () => {
-    const testCard = TEST_CARDS.DISCOVER;
+  it('Can search a payment', async () => {
+    const customOrderId = randomUUID();
+    const testCard = TEST_CARDS.MASTERCARD_1;
 
     const result = await azul.sale({
       type: 'card',
@@ -22,19 +21,17 @@ describe('Can search a payment', () => {
     });
 
     assert(result.type === 'success');
-  });
 
-  it('Can search a payment', async () => {
-    const result = await azul.search({
+    const searchResult = await azul.search({
       dateFrom: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7),
       dateTo: new Date()
     });
 
-    expect(result).toBeDefined();
-    expect(result.Transactions).toBeDefined();
-    expect(result.Transactions?.length).toBeGreaterThan(0);
+    expect(searchResult).toBeDefined();
+    expect(searchResult.Transactions).toBeDefined();
+    expect(searchResult.Transactions?.length).toBeGreaterThan(0);
 
-    const transaction = result.Transactions?.find((t) => t.CustomOrderId === customOrderId);
+    const transaction = searchResult.Transactions?.find((t) => t.CustomOrderId === customOrderId);
     expect(transaction).toBeDefined();
   });
 });

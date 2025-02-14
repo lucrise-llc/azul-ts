@@ -9,7 +9,7 @@ import 'dotenv/config';
 describe('Refund', () => {
   it('Can refund a sale', async () => {
     const customOrderId = randomUUID();
-    const card = TEST_CARDS.DISCOVER;
+    const card = TEST_CARDS.MASTERCARD_1;
 
     const sale = await azul.sale({
       type: 'card',
@@ -41,7 +41,7 @@ describe('Refund', () => {
 
   it('Can refund a post', async () => {
     const customOrderId = randomUUID();
-    const card = TEST_CARDS.DISCOVER;
+    const card = TEST_CARDS.MASTERCARD_1;
 
     const result = await azul.hold({
       type: 'card',
