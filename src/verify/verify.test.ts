@@ -1,15 +1,14 @@
 import { randomUUID } from 'crypto';
-import { describe, expect, it, beforeAll } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { azul } from '../tests/instance';
 import { TEST_CARDS } from '../tests/fixtures/cards';
 import 'dotenv/config';
 
 describe('Can verify a payment', () => {
-  const customOrderId = randomUUID();
-
-  beforeAll(async () => {
-    const card = TEST_CARDS.DISCOVER;
+  it('After the payment, the TransactionType should be "Sale"', async () => {
+    const card = TEST_CARDS.MASTERCARD_1;
+    const customOrderId = randomUUID();
 
     const payment = await azul.sale({
       type: 'card',
@@ -20,13 +19,9 @@ describe('Can verify a payment', () => {
       ITBIS: 10,
       customOrderId
     });
-
     expect(payment.type).toBe('success');
-  });
 
-  it('After the payment, the TransactionType should be "Sale"', async () => {
     const result = await azul.verify(customOrderId);
-
     expect(result.TransactionType).toBe('Sale');
   });
 });
