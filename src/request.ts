@@ -55,13 +55,7 @@ class AzulRequester {
     });
   }
 
-  async request(body: Record<string, unknown>, process?: string): Promise<unknown> {
-    let url = this.url;
-
-    if (process) {
-      url = url + '?' + process;
-    }
-
+  async request({ body, url }: { body: Record<string, unknown>; url: string }): Promise<unknown> {
     const requestBody = capitalizeKeys({
       channel: this.channel,
       store: this.merchantId,

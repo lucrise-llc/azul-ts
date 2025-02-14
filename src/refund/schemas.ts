@@ -5,12 +5,14 @@ import { cardPaymentSchema, tokenPaymentSchema } from '../sale/schemas';
 export const refundRequestSchema = z.union([
   cardPaymentSchema.merge(
     z.object({
-      azulOrderId: z.string()
+      azulOrderId: z.string(),
+      trxType: z.literal('Refund').default('Refund')
     })
   ),
   tokenPaymentSchema.merge(
     z.object({
-      azulOrderId: z.string()
+      azulOrderId: z.string(),
+      trxType: z.literal('Refund').default('Refund')
     })
   )
 ]);

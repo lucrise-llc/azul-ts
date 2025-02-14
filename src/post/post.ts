@@ -10,6 +10,10 @@ import { SaleResponse, saleResponseSchema } from '../sale/schemas';
  * fondos retenidos a la tarjeta.
  */
 export async function post(input: PostRequest, requester: AzulRequester): Promise<SaleResponse> {
-  const response = await requester.request(PostRequestSchema.parse(input), 'ProcessPost');
+  const response = await requester.request({
+    body: PostRequestSchema.parse(input),
+    url: requester.url + '?ProcessPost'
+  });
+
   return saleResponseSchema.parse(response);
 }

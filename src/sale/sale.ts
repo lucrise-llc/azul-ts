@@ -14,8 +14,11 @@ import { SaleRequest, saleRequestSchema, SaleResponse, saleResponseSchema } from
  */
 export async function sale(input: SaleRequest, requester: AzulRequester): Promise<SaleResponse> {
   const response = await requester.request({
-    ...saleRequestSchema.parse(input),
-    trxType: 'Sale'
+    body: {
+      ...saleRequestSchema.parse(input),
+      trxType: 'Sale'
+    },
+    url: requester.url
   });
 
   return saleResponseSchema.parse(response);

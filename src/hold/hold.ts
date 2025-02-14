@@ -21,9 +21,12 @@ import { SaleRequest, saleRequestSchema, SaleResponse, saleResponseSchema } from
  */
 export async function hold(input: SaleRequest, requester: AzulRequester): Promise<SaleResponse> {
   const response = await requester.request({
-    ...saleRequestSchema.parse(input),
-    trxType: 'Hold',
-    acquirerRefData: '1'
+    body: {
+      ...saleRequestSchema.parse(input),
+      trxType: 'Hold',
+      acquirerRefData: '1'
+    },
+    url: requester.url
   });
 
   return saleResponseSchema.parse(response);

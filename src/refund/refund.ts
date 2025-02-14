@@ -22,8 +22,8 @@ export async function refund(
   requester: AzulRequester
 ): Promise<RefundResponse> {
   const response = await requester.request({
-    ...refundRequestSchema.parse(input),
-    trxType: 'Refund'
+    body: refundRequestSchema.parse(input),
+    url: requester.url
   });
 
   return refundResponseSchema.parse(response);

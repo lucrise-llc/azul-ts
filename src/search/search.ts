@@ -10,6 +10,10 @@ export async function search(
   input: SearchRequest,
   requester: AzulRequester
 ): Promise<SearchResponse> {
-  const response = await requester.request(searchRequestSchema.parse(input), 'SearchPayments');
+  const response = await requester.request({
+    body: searchRequestSchema.parse(input),
+    url: requester.url + '?SearchPayments'
+  });
+
   return response as SearchResponse;
 }
