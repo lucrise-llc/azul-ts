@@ -1,5 +1,5 @@
 import AzulRequester from '../request';
-import { SaleRequest, saleRequestSchema, SaleResponse, saleResponseSchema } from './schema';
+import { SaleRequest, saleRequestSchema, SaleResponse, saleResponseSchema } from './schemas';
 
 /**
  * ### SALE: Transacción de venta
