@@ -11,7 +11,7 @@ describe('Can post a payment', () => {
 
     const card = TEST_CARDS.VISA_TEST_CARD;
 
-    const hold = await azul.payments.hold({
+    const hold = await azul.hold({
       type: 'card',
       cardNumber: card.number,
       expiration: card.expiration,
@@ -29,10 +29,9 @@ describe('Can post a payment', () => {
       ITBIS: 10
     });
 
-    console.log('post: ', post);
     assert(post.type === 'success');
 
-    const verify = await azul.verifyPayment(customOrderId);
+    const verify = await azul.verify(customOrderId);
     assert(verify.Found);
     assert(verify.TransactionType === 'Post');
   }, 60000);
