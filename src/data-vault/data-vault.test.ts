@@ -21,7 +21,7 @@ describe('DataVault', () => {
   });
 
   it('Can make a payment with a DataVault token', async () => {
-    const result = await azul.payments.sale({
+    const result = await azul.sale({
       type: 'token',
       dataVaultToken,
       amount: 100,
@@ -37,7 +37,7 @@ describe('DataVault', () => {
   });
 
   it('After deleting a DataVault token, it should not be possible to make a payment with it', async () => {
-    const response = await azul.payments.sale({
+    const response = await azul.sale({
       type: 'token',
       dataVaultToken,
       amount: 100,
