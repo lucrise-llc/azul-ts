@@ -8,7 +8,7 @@ describe('Can make a payment', () => {
   it('Can make a payment', async () => {
     const card = TEST_CARDS.VISA_TEST_CARD;
 
-    const result = await azul.payments.sale({
+    const result = await azul.sale({
       type: 'card',
       cardNumber: card.number,
       expiration: card.expiration,
@@ -23,7 +23,7 @@ describe('Can make a payment', () => {
   it('Should reject expired cards', async () => {
     const card = TEST_CARDS.VISA_TEST_CARD;
 
-    const response = await azul.payments.hold({
+    const response = await azul.sale({
       type: 'card',
       cardNumber: card.number,
       expiration: '202301', // Past date
@@ -40,7 +40,7 @@ describe('Can make a payment', () => {
   it('Should reject an invalid expiration format', async () => {
     const card = TEST_CARDS.VISA_TEST_CARD;
 
-    const response = await azul.payments.sale({
+    const response = await azul.sale({
       type: 'card',
       cardNumber: card.number,
       expiration: '012345', // Invalid format (not a valid date)
@@ -56,7 +56,7 @@ describe('Can make a payment', () => {
   it('Should fail when exceeding card limit', async () => {
     const card = TEST_CARDS.VISA_LIMITED;
 
-    const result = await azul.payments.sale({
+    const result = await azul.sale({
       type: 'card',
       cardNumber: card.number,
       expiration: card.expiration,
