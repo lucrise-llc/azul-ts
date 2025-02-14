@@ -1,17 +1,18 @@
 import { randomUUID } from 'crypto';
-import { describe, expect, it, beforeAll } from 'vitest';
+import { describe, expect, it, beforeAll, assert } from 'vitest';
 
 import { azul } from './instance';
-import { getCard } from '../fixtures/cards';
-import { expectSuccessfulPayment } from '../utils';
+import { TEST_CARDS } from '../fixtures/cards';
 import 'dotenv/config';
 
 describe('Can search a payment', () => {
   const customOrderId = randomUUID();
 
   beforeAll(async () => {
-    const testCard = getCard('DISCOVER');
+    const testCard = TEST_CARDS.DISCOVER;
+
     const result = await azul.payments.sale({
+      type: 'card',
       cardNumber: testCard.number,
       expiration: testCard.expiration,
       CVC: testCard.cvv,
@@ -20,9 +21,8 @@ describe('Can search a payment', () => {
       ITBIS: 10
     });
 
-    expect(result).toBeDefined();
-    expectSuccessfulPayment(result);
-  }, 60000);
+    assert(result.type === 'success');
+  });
 
   it('Can search a payment', async () => {
     const result = await azul.search({
@@ -36,5 +36,5 @@ describe('Can search a payment', () => {
 
     const transaction = result.Transactions?.find((t) => t.CustomOrderId === customOrderId);
     expect(transaction).toBeDefined();
-  }, 60000);
+  });
 });

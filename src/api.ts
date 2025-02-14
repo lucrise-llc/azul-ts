@@ -86,7 +86,8 @@ class AzulAPI {
       SearchSchema.parse(input),
       Process.SearchPayments
     );
-    return paymentResponseSchema.parse(response);
+
+    return response as SearchResponse;
   }
 }
 
