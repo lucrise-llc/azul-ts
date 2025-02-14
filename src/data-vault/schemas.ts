@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { CVC, cardNumber, expiration } from '../schemas';
 
+// Create DataVault
 export const createDataVaultSchema = z.object({
   cardNumber,
   expiration,
@@ -21,6 +22,10 @@ export const createDataVaultResponseSchema = z.object({
   ResponseMessage: z.literal('APROBADA')
 });
 
+export type CreateDataVault = z.input<typeof createDataVaultSchema>;
+export type CreateDataVaultResponse = z.infer<typeof createDataVaultResponseSchema>;
+
+// Delete DataVault
 export const deleteDataVaultSchema = z.object({
   dataVaultToken: z.string().max(36),
   trxType: z.literal('DELETE').default('DELETE')
@@ -33,7 +38,5 @@ export const deleteDataVaultResponseSchema = z.object({
   ResponseMessage: z.literal('APROBADA')
 });
 
-export type CreateDataVault = z.input<typeof createDataVaultSchema>;
 export type DeleteDataVault = z.input<typeof deleteDataVaultSchema>;
-export type CreateDataVaultResponse = z.infer<typeof createDataVaultResponseSchema>;
 export type DeleteDataVaultResponse = z.infer<typeof deleteDataVaultResponseSchema>;
