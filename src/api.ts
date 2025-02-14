@@ -2,7 +2,6 @@ import { sale } from './sale/sale';
 import { post } from './post/post';
 import { hold } from './hold/hold';
 import { search } from './search/search';
-import { Secure } from './secure/secure';
 import { refund } from './refund/refund';
 import { verify } from './verify/verify';
 import { PostRequest } from './post/schemas';
@@ -15,8 +14,7 @@ import { SearchRequest, SearchResponse } from './search/schemas';
 import { parsePEM } from './parse-certificate/parse-certificate';
 import { RefundRequestInput, RefundResponse } from './refund/schemas';
 
-class AzulAPI {
-  public readonly secure: Secure;
+export class Azul {
   public readonly vault: DataVault;
   private readonly requester: AzulRequester;
 
@@ -26,7 +24,6 @@ class AzulAPI {
 
     this.requester = new AzulRequester(config);
     this.vault = new DataVault(this.requester);
-    this.secure = new Secure(this.requester);
   }
 
   async sale(input: SaleRequest): Promise<SaleResponse> {
@@ -57,5 +54,3 @@ class AzulAPI {
     return hold(input, this.requester);
   }
 }
-
-export default AzulAPI;

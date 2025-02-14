@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { config } from 'dotenv';
 
-import AzulAPI from '../api';
+import { Azul } from '../api';
 
 config();
 
@@ -13,9 +13,9 @@ const envSchema = z.object({
   AZUL_KEY: z.string()
 });
 
-const env = envSchema.parse(process.env);
+export const env = envSchema.parse(process.env);
 
-export const azul = new AzulAPI({
+export const azul = new Azul({
   auth1: env.AUTH1,
   auth2: env.AUTH2,
   merchantId: env.MERCHANT_ID,
