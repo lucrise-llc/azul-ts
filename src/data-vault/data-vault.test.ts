@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { azul } from '../tests/integration/instance';
+import { azul } from '../tests/instance';
 import { TEST_CARDS } from '../tests/fixtures/cards';
 import 'dotenv/config';
 

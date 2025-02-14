@@ -67,35 +67,3 @@ export const TEST_CARDS = {
     cvv: '123'
   }
 } as const;
-
-/**
- * Type for a test card
- */
-export type TestCard = {
-  number: string;
-  expiration: string;
-  cvv: string;
-  maxAmount?: number;
-};
-
-/**
- * Get a random test card
- * @param excludeCards - Card keys to exclude from selection
- * @returns A random test card
- */
-export function getRandomCard(excludeCards: (keyof typeof TEST_CARDS)[] = []): TestCard {
-  const availableCards = Object.entries(TEST_CARDS)
-    .filter(([key]) => !excludeCards.includes(key as keyof typeof TEST_CARDS))
-    .map(([, card]) => card);
-
-  return availableCards[Math.floor(Math.random() * availableCards.length)];
-}
-
-/**
- * Get a test card by key
- * @param key - Key of the test card to get
- * @returns The requested test card
- */
-export function getCard(key: keyof typeof TEST_CARDS): TestCard {
-  return TEST_CARDS[key];
-}

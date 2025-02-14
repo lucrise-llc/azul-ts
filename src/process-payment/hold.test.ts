@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import { describe, expect, beforeAll, it, assert } from 'vitest';
 
-import { azul } from '../tests/integration/instance';
+import { azul } from '../tests/instance';
 import { TEST_CARDS } from '../tests/fixtures/cards';
 import 'dotenv/config';
 

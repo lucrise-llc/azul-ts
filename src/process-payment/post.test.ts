@@ -1,8 +1,8 @@
 import { randomUUID } from 'crypto';
 import { assert, describe, it } from 'vitest';
 
-import { azul } from './instance';
-import { TEST_CARDS } from '../fixtures/cards';
+import { azul } from '../tests/instance';
+import { TEST_CARDS } from '../tests/fixtures/cards';
 import 'dotenv/config';
 
 describe('Can post a payment', () => {

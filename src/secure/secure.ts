@@ -4,7 +4,7 @@ import { sleep } from '../utils';
 import { Process } from '../processes';
 import AzulRequester from '../request';
 import { MethodNotificationStatus, SecureSale } from './types';
-import { ProcessPaymentSchema } from '../process-payment/schemas';
+import { processPaymentSchema } from '../process-payment/schemas';
 import { ProcessPaymentTransaction } from '../process-payment/process-payment';
 
 type SecurePaymentSession = {
@@ -36,7 +36,7 @@ export class Secure {
     const secureId = randomUUID();
 
     const result = await this.requester.safeRequest({
-      ...ProcessPaymentSchema.parse(input),
+      ...processPaymentSchema.parse(input),
       forceNo3DS: '0',
       cardHolderInfo: input.cardHolderInfo,
       browserInfo: input.browserInfo,
