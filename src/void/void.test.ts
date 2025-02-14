@@ -12,7 +12,7 @@ describe('Can void a payment', () => {
   beforeAll(async () => {
     const card = TEST_CARDS.VISA_TEST_CARD;
 
-    const payment = await azul.payments.sale({
+    const payment = await azul.sale({
       type: 'card',
       cardNumber: card.number,
       expiration: card.expiration,
@@ -27,7 +27,7 @@ describe('Can void a payment', () => {
   });
 
   it('After the payment, the TransactionType should be "Sale"', async () => {
-    const verifyPayment = await azul.verifyPayment(customOrderId);
+    const verifyPayment = await azul.verify(customOrderId);
     assert(verifyPayment.TransactionType === 'Sale');
   });
 
@@ -35,7 +35,7 @@ describe('Can void a payment', () => {
     const voidResponse = await azul.void(azulOrderId);
     assert(voidResponse.type === 'success');
 
-    const verifyPayment = await azul.verifyPayment(customOrderId);
+    const verifyPayment = await azul.verify(customOrderId);
     assert(verifyPayment.TransactionType === 'Void');
   });
 });
