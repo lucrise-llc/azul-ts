@@ -1,31 +1,24 @@
-import { Process } from './processes';
+import { sale } from './sale/sale';
+import { post } from './post/post';
+import { hold } from './hold/hold';
+import { search } from './search/search';
 import { Secure } from './secure/secure';
+import { refund } from './refund/refund';
+import { verify } from './verify/verify';
+import { PostRequest } from './post/schemas';
+import { voidTransaction } from './void/void';
 import DataVault from './data-vault/data-vault';
 import AzulRequester, { Config } from './request';
-import ProcessPayment from './process-payment/process-payment';
+import { VerifyResponse } from './verify/schemas';
+import { SaleRequest, SaleResponse } from './sale/schemas';
+import { SearchRequest, SearchResponse } from './search/schemas';
 import { parsePEM } from './parse-certificate/parse-certificate';
-import {
-  PostSchema,
-  PostSchemaInput,
-  SearchResponse,
-  SearchSchema,
-  SearchSchemaInput
-} from './schemas';
-import {
-  PaymentResponse,
-  paymentResponseSchema,
-  verifySchema,
-  VerifyResponse
-} from './process-payment/schemas';
+import { RefundRequestInput, RefundResponse } from './refund/schemas';
 
 class AzulAPI {
-  private requester: AzulRequester;
-
-  public vault: DataVault;
-  public payments: ProcessPayment;
-  public secure: Secure;
-  public certificate: string;
-  public key: string;
+  public readonly secure: Secure;
+  public readonly vault: DataVault;
+  private readonly requester: AzulRequester;
 
   constructor(config: Config) {
     config.key = parsePEM(config.key, 'key');
@@ -33,61 +26,35 @@ class AzulAPI {
 
     this.requester = new AzulRequester(config);
     this.vault = new DataVault(this.requester);
-    this.payments = new ProcessPayment(this.requester);
     this.secure = new Secure(this.requester);
-    this.certificate = config.certificate;
-    this.key = config.key;
   }
 
-  /**
-   * ### Transacción para anular venta, post o hold
-   * Las transacciones de venta o post se pueden anular antes de los 20 minutos de haber
-   * recibido la respuesta de aprobación.
-   * Las transacciones de hold que no han sido posteadas no tienen límite de tiempo para
-   * anularse.
-   */
-  async void(azulOrderId: string): Promise<PaymentResponse> {
-    const response = await this.requester.safeRequest({ azulOrderId }, Process.Void);
-    return paymentResponseSchema.parse(response);
+  async sale(input: SaleRequest): Promise<SaleResponse> {
+    return sale(input, this.requester);
   }
 
-  /**
-   * ### Transacción para hacer captura o posteo del Hold
-   * El método "Post" permite capturar un "Hold" realizado previamente para su liquidación.
-   * El monto del "Post" puede ser igual o menor al monto del "Hold". En caso de que el
-   * monto del Post sea menor al Hold, se envía un mensaje de reverso para liberar los
-   * fondos retenidos a la tarjeta.
-   */
-  async post(input: PostSchemaInput): Promise<PaymentResponse> {
-    const response = await this.requester.safeRequest(PostSchema.parse(input), Process.Post);
-    return paymentResponseSchema.parse(response);
+  async post(input: PostRequest): Promise<SaleResponse> {
+    return post(input, this.requester);
   }
 
-  /**
-   * Método VerifyPayment
-   * Este método permite verificar la respuesta enviada por el webservice de una
-   * transacción anterior (procesada por el método ProccesPayment) identificada por el
-   * campo CustomOrderId.
-   * Si existe más de una transacción con este identificador este método devolverá los
-   * valores de la última transacción (más reciente) de ellas.
-   */
-  async verifyPayment(customOrderId: string): Promise<VerifyResponse> {
-    const response = await this.requester.safeRequest({ customOrderId }, Process.VerifyPayment);
-    return verifySchema.parse(response);
+  async void(azulOrderId: string): Promise<SaleResponse> {
+    return voidTransaction(azulOrderId, this.requester);
   }
 
-  /**
-   * Este método permite extraer los detalles de una o varias transacciones
-   * vía Webservices, anteriormente procesadas de un rango de fechas
-   * previamente seleccionado.
-   */
-  async search(input: SearchSchemaInput): Promise<SearchResponse> {
-    const response = await this.requester.safeRequest(
-      SearchSchema.parse(input),
-      Process.SearchPayments
-    );
+  async verify(customOrderId: string): Promise<VerifyResponse> {
+    return verify(customOrderId, this.requester);
+  }
 
-    return response as SearchResponse;
+  async search(input: SearchRequest): Promise<SearchResponse> {
+    return search(input, this.requester);
+  }
+
+  async refund(input: RefundRequestInput): Promise<RefundResponse> {
+    return refund(input, this.requester);
+  }
+
+  async hold(input: SaleRequest): Promise<SaleResponse> {
+    return hold(input, this.requester);
   }
 }
 
