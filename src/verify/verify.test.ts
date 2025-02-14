@@ -11,7 +11,7 @@ describe('Can verify a payment', () => {
   beforeAll(async () => {
     const card = TEST_CARDS.DISCOVER;
 
-    const payment = await azul.payments.sale({
+    const payment = await azul.sale({
       type: 'card',
       cardNumber: card.number,
       expiration: card.expiration,
@@ -25,7 +25,7 @@ describe('Can verify a payment', () => {
   });
 
   it('After the payment, the TransactionType should be "Sale"', async () => {
-    const result = await azul.verifyPayment(customOrderId);
+    const result = await azul.verify(customOrderId);
 
     expect(result.TransactionType).toBe('Sale');
   });
