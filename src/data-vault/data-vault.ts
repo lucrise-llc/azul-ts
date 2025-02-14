@@ -1,4 +1,3 @@
-import { Process } from '../processes';
 import AzulRequester from '../request';
 import {
   createDataVaultSchema,
@@ -25,11 +24,8 @@ class DataVault {
    */
   async create(input: CreateDataVault): Promise<CreateDataVaultResponse> {
     const response = await this.requester.safeRequest(
-      createDataVaultSchema.parse({
-        ...input,
-        trxType: 'CREATE'
-      }),
-      Process.Datavault
+      createDataVaultSchema.parse(input),
+      'ProcessDatavault'
     );
 
     return createDataVaultResponseSchema.parse(response);
@@ -41,11 +37,8 @@ class DataVault {
    */
   async delete(input: DeleteDataVault): Promise<DeleteDataVaultResponse> {
     const response = await this.requester.safeRequest(
-      deleteDataVaultSchema.parse({
-        ...input,
-        trxType: 'DELETE'
-      }),
-      Process.Datavault
+      deleteDataVaultSchema.parse(input),
+      'ProcessDatavault'
     );
 
     return deleteDataVaultResponseSchema.parse(response);

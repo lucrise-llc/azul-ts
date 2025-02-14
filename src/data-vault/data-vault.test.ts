@@ -1,14 +1,12 @@
-import { describe, expect, it } from 'vitest';
+import { assert, describe, it } from 'vitest';
 
 import { azul } from '../tests/instance';
 import { TEST_CARDS } from '../tests/fixtures/cards';
 import 'dotenv/config';
 
 describe('DataVault', () => {
-  let dataVaultToken: string;
-
   it('Can create a DataVault token', async () => {
-    const card = TEST_CARDS.DISCOVER;
+    const card = TEST_CARDS.MASTERCARD_1;
 
     const result = await azul.vault.create({
       cardNumber: card.number,
@@ -16,34 +14,66 @@ describe('DataVault', () => {
       CVC: card.cvv
     });
 
-    expect(result.IsoCode).toBe('00');
-    dataVaultToken = result.DataVaultToken;
+    assert(result.IsoCode === '00');
   });
 
   it('Can make a payment with a DataVault token', async () => {
+    const card = TEST_CARDS.MASTERCARD_1;
+
+    const createDataVaultresult = await azul.vault.create({
+      cardNumber: card.number,
+      expiration: card.expiration,
+      CVC: card.cvv
+    });
+
     const result = await azul.sale({
       type: 'token',
-      dataVaultToken,
+      dataVaultToken: createDataVaultresult.DataVaultToken,
       amount: 100,
       ITBIS: 10
     });
 
-    expect(result.IsoCode).toBe('00');
+    assert(result.type === 'success');
   });
 
   it('Can delete a DataVault token', async () => {
-    const result = await azul.vault.delete({ dataVaultToken });
-    expect(result.IsoCode).toBe('00');
+    const card = TEST_CARDS.MASTERCARD_1;
+
+    const createDataVaultresult = await azul.vault.create({
+      cardNumber: card.number,
+      expiration: card.expiration,
+      CVC: card.cvv
+    });
+
+    const result = await azul.vault.delete({
+      dataVaultToken: createDataVaultresult.DataVaultToken
+    });
+
+    assert(result.IsoCode === '00');
   });
 
   it('After deleting a DataVault token, it should not be possible to make a payment with it', async () => {
+    const card = TEST_CARDS.MASTERCARD_1;
+
+    const createDataVaultresult = await azul.vault.create({
+      cardNumber: card.number,
+      expiration: card.expiration,
+      CVC: card.cvv
+    });
+
+    const deleteDataVaultresult = await azul.vault.delete({
+      dataVaultToken: createDataVaultresult.DataVaultToken
+    });
+
+    assert(deleteDataVaultresult.IsoCode === '00');
+
     const response = await azul.sale({
       type: 'token',
-      dataVaultToken,
+      dataVaultToken: createDataVaultresult.DataVaultToken,
       amount: 100,
       ITBIS: 10
     });
 
-    expect(response.type).toBe('error');
+    assert(response.type === 'error');
   });
 });
