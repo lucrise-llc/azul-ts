@@ -18,9 +18,3 @@ export function capitalizeKeys(obj: Record<string, unknown>): Record<string, unk
 
   return newObj;
 }
-
-export function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
