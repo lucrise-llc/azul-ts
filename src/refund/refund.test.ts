@@ -11,7 +11,7 @@ describe('Refund', () => {
     const customOrderId = randomUUID();
     const card = TEST_CARDS.DISCOVER;
 
-    const sale = await azul.payments.sale({
+    const sale = await azul.sale({
       type: 'card',
       cardNumber: card.number,
       expiration: card.expiration,
@@ -23,7 +23,7 @@ describe('Refund', () => {
 
     assert(sale.type === 'success');
 
-    const refund = await azul.payments.refund({
+    const refund = await azul.refund({
       type: 'card',
       cardNumber: card.number,
       expiration: card.expiration,
@@ -35,7 +35,7 @@ describe('Refund', () => {
 
     expect(refund.IsoCode).toBe('00');
 
-    const verify = await azul.verifyPayment(customOrderId);
+    const verify = await azul.verify(customOrderId);
     expect(verify.TransactionType).toBe('Refund');
   }, 60000);
 
@@ -43,7 +43,7 @@ describe('Refund', () => {
     const customOrderId = randomUUID();
     const card = TEST_CARDS.DISCOVER;
 
-    const result = await azul.payments.hold({
+    const result = await azul.hold({
       type: 'card',
       cardNumber: card.number,
       expiration: card.expiration,
@@ -63,7 +63,7 @@ describe('Refund', () => {
 
     assert(post.type === 'success');
 
-    const refund = await azul.payments.refund({
+    const refund = await azul.refund({
       type: 'card',
       cardNumber: card.number,
       expiration: card.expiration,
@@ -75,7 +75,7 @@ describe('Refund', () => {
 
     expect(refund.IsoCode).toBe('00');
 
-    const verify = await azul.verifyPayment(customOrderId);
+    const verify = await azul.verify(customOrderId);
     expect(verify.TransactionType).toBe('Refund');
   }, 60000);
 });
