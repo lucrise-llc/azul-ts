@@ -5,8 +5,8 @@ import { describe, expect, it } from 'vitest';
 import { parsePEM, PEMError } from './parse-certificate';
 
 describe('Certificate handling', () => {
-  const TEMP_CERT_PATH = resolve(__dirname, './test-cert.crt');
-  const TEMP_KEY_PATH = resolve(__dirname, './test-key.key');
+  const TEMP_CERT_PATH = resolve(__dirname, '../tests/fixtures/test-cert.crt');
+  const TEMP_KEY_PATH = resolve(__dirname, '../tests/fixtures/test-key.key');
 
   const CERT_CONTENT = readFileSync(TEMP_CERT_PATH, 'utf-8');
   const KEY_CONTENT = readFileSync(TEMP_KEY_PATH, 'utf-8');
