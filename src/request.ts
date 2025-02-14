@@ -1,6 +1,6 @@
 import { request, Agent } from 'undici';
 
-import { capitalizeKeys } from './utils';
+import { capitalizeKeys } from './utils/capitalize';
 
 enum AzulURL {
   DEV = 'https://pruebas.azul.com.do/webservices/JSON/Default.aspx',
