@@ -33,7 +33,7 @@ export class Secure {
   > {
     const secureId = randomUUID();
 
-    const result = await this.requester.safeRequest({
+    const result = await this.requester.request({
       ...saleRequestSchema.parse(input),
       forceNo3DS: '0',
       cardHolderInfo: input.cardHolderInfo,
@@ -93,7 +93,7 @@ export class Secure {
     azulOrderId: string;
     methodNotificationStatus: MethodNotificationStatus;
   }) {
-    return await this.requester.safeRequest(
+    return await this.requester.request(
       {
         azulOrderId: input.azulOrderId,
         methodNotificationStatus: input.methodNotificationStatus
@@ -116,7 +116,7 @@ export class Secure {
   }
 
   private async process3DsChallenge(input: { azulOrderId: string; cRes: string }) {
-    return await this.requester.safeRequest(
+    return await this.requester.request(
       {
         azulOrderId: input.azulOrderId,
         cRes: input.cRes

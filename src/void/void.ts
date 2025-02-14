@@ -12,6 +12,12 @@ export async function voidTransaction(
   azulOrderId: string,
   requester: AzulRequester
 ): Promise<SaleResponse> {
-  const response = await requester.safeRequest({ azulOrderId }, 'ProcessVoid');
+  const response = await requester.request({
+    body: {
+      azulOrderId
+    },
+    url: requester.url + '?ProcessVoid'
+  });
+
   return saleResponseSchema.parse(response);
 }

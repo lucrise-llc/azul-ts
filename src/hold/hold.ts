@@ -20,10 +20,13 @@ import { SaleRequest, saleRequestSchema, SaleResponse, saleResponseSchema } from
  * 5. El Void libera o cancela los fondos retenidos.
  */
 export async function hold(input: SaleRequest, requester: AzulRequester): Promise<SaleResponse> {
-  const response = await requester.safeRequest({
-    ...saleRequestSchema.parse(input),
-    trxType: 'Hold',
-    acquirerRefData: '1'
+  const response = await requester.request({
+    body: {
+      ...saleRequestSchema.parse(input),
+      trxType: 'Hold',
+      acquirerRefData: '1'
+    },
+    url: requester.url
   });
 
   return saleResponseSchema.parse(response);
