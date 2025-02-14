@@ -4,7 +4,7 @@ import { azul } from '../tests/instance';
 import { TEST_CARDS } from '../tests/fixtures/cards';
 import 'dotenv/config';
 
-describe('DataVault', () => {
+describe.concurrent('DataVault', () => {
   it('Can create a DataVault token', async () => {
     const card = TEST_CARDS.MASTERCARD_1;
 
