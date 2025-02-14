@@ -55,7 +55,7 @@ class AzulRequester {
     });
   }
 
-  async safeRequest(body: Record<string, unknown>, process?: string): Promise<unknown> {
+  async request(body: Record<string, unknown>, process?: string): Promise<unknown> {
     let url = this.url;
 
     if (process) {

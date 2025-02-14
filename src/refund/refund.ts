@@ -21,7 +21,7 @@ export async function refund(
   input: RefundRequestInput,
   requester: AzulRequester
 ): Promise<RefundResponse> {
-  const response = await requester.safeRequest({
+  const response = await requester.request({
     ...refundRequestSchema.parse(input),
     trxType: 'Refund'
   });

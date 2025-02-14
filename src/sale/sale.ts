@@ -13,7 +13,7 @@ import { SaleRequest, saleRequestSchema, SaleResponse, saleResponseSchema } from
  * una transacción de “Refund” o devolución para devolver los fondos a la tarjeta.
  */
 export async function sale(input: SaleRequest, requester: AzulRequester): Promise<SaleResponse> {
-  const response = await requester.safeRequest({
+  const response = await requester.request({
     ...saleRequestSchema.parse(input),
     trxType: 'Sale'
   });

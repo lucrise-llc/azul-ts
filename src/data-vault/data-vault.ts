@@ -23,7 +23,7 @@ class DataVault {
    * sin necesidad de realizar una venta.
    */
   async create(input: CreateDataVault): Promise<CreateDataVaultResponse> {
-    const response = await this.requester.safeRequest(
+    const response = await this.requester.request(
       createDataVaultSchema.parse(input),
       'ProcessDatavault'
     );
@@ -36,7 +36,7 @@ class DataVault {
    * Con esta transacción se solicita la eliminación de un token de la Bóveda de Datos.
    */
   async delete(input: DeleteDataVault): Promise<DeleteDataVaultResponse> {
-    const response = await this.requester.safeRequest(
+    const response = await this.requester.request(
       deleteDataVaultSchema.parse(input),
       'ProcessDatavault'
     );

@@ -13,6 +13,6 @@ export async function verify(
   customOrderId: string,
   requester: AzulRequester
 ): Promise<VerifyResponse> {
-  const response = await requester.safeRequest({ customOrderId }, 'VerifyPayment');
+  const response = await requester.request({ customOrderId }, 'VerifyPayment');
   return verifySchema.parse(response);
 }
