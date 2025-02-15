@@ -57,12 +57,34 @@ export const deleteDataVaultSchema = z.object({
   trxType: z.literal('DELETE').default('DELETE')
 });
 
-export const deleteDataVaultResponseSchema = z.object({
-  ErrorDescription: z.literal(''),
-  HasCVV: z.boolean(),
-  IsoCode: z.literal('00'),
-  ResponseMessage: z.literal('APROBADA')
-});
+const successDeleteDataVaultResponseSchema = z
+  .object({
+    ErrorDescription: z.literal(''),
+    HasCVV: z.boolean(),
+    IsoCode: z.literal('00'),
+    ResponseMessage: z.literal('APROBADA')
+  })
+  .transform((data) => ({
+    ...data,
+    type: 'success' as const
+  }));
+
+const errorDeleteDataVaultResponseSchema = z
+  .object({
+    ErrorDescription: z.string().nonempty(),
+    HasCVV: z.boolean(),
+    IsoCode: z.string().nonempty(),
+    ResponseMessage: z.string().nonempty()
+  })
+  .transform((data) => ({
+    ...data,
+    type: 'error' as const
+  }));
+
+export const deleteDataVaultResponseSchema = z.union([
+  successDeleteDataVaultResponseSchema,
+  errorDeleteDataVaultResponseSchema
+]);
 
 export type DeleteDataVault = z.input<typeof deleteDataVaultSchema>;
 export type DeleteDataVaultResponse = z.infer<typeof deleteDataVaultResponseSchema>;

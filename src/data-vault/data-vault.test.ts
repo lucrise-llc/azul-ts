@@ -60,7 +60,16 @@ describe.concurrent('DataVault', () => {
       dataVaultToken: createDataVaultresult.DataVaultToken
     });
 
-    assert(result.IsoCode === '00');
+    assert(result.type === 'success');
+  });
+
+  it('Should fail to delete a DataVault token with an invalid token', async () => {
+    const result = await azul.vault.delete({
+      dataVaultToken: 'test'
+    });
+
+    assert(result.type === 'error');
+    assert(result.ErrorDescription === 'VALIDATION_ERROR:DataVaultToken');
   });
 
   it('After deleting a DataVault token, it should not be possible to make a payment with it', async () => {
