@@ -14,7 +14,18 @@ describe.concurrent('DataVault', () => {
       CVC: card.cvv
     });
 
-    assert(result.IsoCode === '00');
+    assert(result.type === 'success');
+  });
+
+  it('Should fail to create a DataVault token with an invalid card number', async () => {
+    const result = await azul.vault.create({
+      cardNumber: 'test',
+      expiration: '122025',
+      CVC: '123'
+    });
+
+    assert(result.type === 'error');
+    assert(result.ErrorDescription === 'VALIDATION_ERROR:CardNumber');
   });
 
   it('Can make a payment with a DataVault token', async () => {

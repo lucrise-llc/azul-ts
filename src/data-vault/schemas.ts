@@ -11,16 +11,42 @@ export const createDataVaultSchema = z.object({
   saveToDataVault: z.literal('1').default('1')
 });
 
-export const createDataVaultResponseSchema = z.object({
-  DataVaultToken: z.string().nonempty(),
-  CardNumber: z.string(),
-  Expiration: z.string(),
-  Brand: z.string(),
-  ErrorDescription: z.literal(''),
-  HasCVV: z.boolean(),
-  IsoCode: z.literal('00'),
-  ResponseMessage: z.literal('APROBADA')
-});
+const successCreateDataVaultResponseSchema = z
+  .object({
+    DataVaultToken: z.string().nonempty(),
+    CardNumber: z.string().nonempty(),
+    Expiration: z.string().nonempty(),
+    Brand: z.string().nonempty(),
+    ErrorDescription: z.literal(''),
+    HasCVV: z.boolean(),
+    IsoCode: z.literal('00'),
+    ResponseMessage: z.literal('APROBADA')
+  })
+  .transform((data) => ({
+    ...data,
+    type: 'success' as const
+  }));
+
+const errorCreateDataVaultResponseSchema = z
+  .object({
+    DataVaultToken: z.literal(''),
+    CardNumber: z.literal(''),
+    Expiration: z.literal(''),
+    Brand: z.literal(''),
+    ErrorDescription: z.string().nonempty(),
+    HasCVV: z.boolean(),
+    IsoCode: z.string().nonempty(),
+    ResponseMessage: z.string().nonempty()
+  })
+  .transform((data) => ({
+    ...data,
+    type: 'error' as const
+  }));
+
+export const createDataVaultResponseSchema = z.union([
+  successCreateDataVaultResponseSchema,
+  errorCreateDataVaultResponseSchema
+]);
 
 export type CreateDataVault = z.input<typeof createDataVaultSchema>;
 export type CreateDataVaultResponse = z.infer<typeof createDataVaultResponseSchema>;
