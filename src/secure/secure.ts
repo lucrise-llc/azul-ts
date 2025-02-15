@@ -1,211 +1,195 @@
 import { randomUUID } from 'crypto';
 
-import { sleep } from '../utils';
-import AzulRequester from '../request';
-import { saleRequestSchema } from '../sale/schemas';
-import { MethodNotificationStatus, SecureSale } from './types';
+import { SaleResponse } from '../sale/schemas';
+import { processThreeDSMethod } from './method';
+import AzulRequester, { Config } from '../request';
+import { assertNever } from '../utils/assert-never';
+import { ThreeDSChallengeResponse } from './schemas';
+import { processThreeDSChallenge } from './challenge';
+import { parsePEM } from '../parse-certificate/parse-certificate';
+import { secureSale, SecureSaleRequest, secureSaleRequestSchema } from './sale';
 
-type SecurePaymentSession = {
+type SuccessResponse = {
+  type: 'success';
   azulOrderId: string;
-  termUrl: string;
-  methodNotificationUrl: string;
 };
 
-export class Secure {
-  private readonly requester: AzulRequester;
-  private securePaymentSessions = new Map<string, SecurePaymentSession>();
+type ChallengeResponse = {
+  type: 'challenge';
+  form: string;
+};
 
-  constructor(requester: AzulRequester) {
-    this.requester = requester;
+type MethodResponse = {
+  type: 'method';
+  form: string;
+};
+
+type ErrorResponse = {
+  type: 'error';
+  error: string;
+};
+
+export type SecureConfig = Config & {
+  processMethodBaseUrl: string;
+  processChallengeBaseUrl: string;
+};
+
+export class AzulSecure {
+  private readonly storage = new Map<string, string>();
+  public processMethodBaseUrl: string;
+  public processChallengeBaseUrl: string;
+  public requester: AzulRequester;
+
+  constructor(config: SecureConfig) {
+    config.key = parsePEM(config.key, 'key');
+    config.certificate = parsePEM(config.certificate, 'certificate');
+
+    this.requester = new AzulRequester(config);
+    this.processMethodBaseUrl = config.processMethodBaseUrl;
+    this.processChallengeBaseUrl = config.processChallengeBaseUrl;
   }
 
-  async sale(input: SecureSale): Promise<
-    | {
-        redirect: true;
-        id: string;
-        html: string;
-      }
-    | {
-        redirect: false;
-        id: string;
-        value: any;
-      }
-  > {
+  async secureSale(
+    input: SecureSaleRequest
+  ): Promise<SuccessResponse | ChallengeResponse | MethodResponse | ErrorResponse> {
     const secureId = randomUUID();
+    const parsedInput = secureSaleRequestSchema.parse(input);
 
-    const result = await this.requester.request({
-      ...saleRequestSchema.parse(input),
-      forceNo3DS: '0',
-      cardHolderInfo: input.cardHolderInfo,
-      browserInfo: input.browserInfo,
-      threeDSAuth: {
-        ...input.threeDSAuth,
-        TermUrl: input.threeDSAuth.TermUrl + `?id=${secureId}`,
-        MethodNotificationUrl: input.threeDSAuth.MethodNotificationUrl + `?id=${secureId}`
+    const result = await secureSale({
+      input: {
+        ...parsedInput,
+        ThreeDSAuth: {
+          TermUrl: `${this.processChallengeBaseUrl}?secureId=${secureId}`,
+          MethodNotificationUrl: `${this.processMethodBaseUrl}?secureId=${secureId}`,
+          ...parsedInput.ThreeDSAuth
+        }
       },
-      trxType: 'Sale'
+      requester: this.requester
     });
 
-    if (result.ResponseMessage === '3D_SECURE_CHALLENGE') {
-      this.securePaymentSessions.set(secureId, {
-        azulOrderId: result.AzulOrderId,
-        termUrl: input.threeDSAuth.TermUrl,
-        methodNotificationUrl: input.threeDSAuth.MethodNotificationUrl
-      });
+    switch (result.type) {
+      case 'success':
+        await this.storage.delete(secureId);
 
-      return {
-        redirect: true,
-        id: secureId,
-        html: challengeResponse({
-          termUrl: input.threeDSAuth.TermUrl,
-          creq: result.ThreeDSChallenge.CReq,
-          redirectPostUrl: result.ThreeDSChallenge.RedirectPostUrl
-        })
-      };
-    } else if (result.ResponseMessage === '3D_SECURE_2_METHOD') {
-      this.securePaymentSessions.set(secureId, {
-        azulOrderId: result.AzulOrderId,
-        termUrl: input.threeDSAuth.TermUrl,
-        methodNotificationUrl: input.threeDSAuth.MethodNotificationUrl
-      });
+        return {
+          type: 'success',
+          azulOrderId: result.AzulOrderId
+        };
 
-      let form: string = result.ThreeDSMethod.MethodForm;
+      case 'challenge':
+        this.storage.set(secureId, result.AzulOrderId);
 
-      if (!input.useIframe) {
-        form = form.replace('target=', '');
-      }
+        return {
+          type: 'challenge',
+          form: this.generateThreeDSChallengeResponseForm({
+            response: result,
+            secureId
+          })
+        };
 
-      return {
-        redirect: true,
-        id: secureId,
-        html: form
-      };
-    } else {
-      return {
-        redirect: false,
-        id: secureId,
-        value: result
-      };
+      case 'method':
+        this.storage.set(secureId, result.AzulOrderId);
+
+        return {
+          type: 'method',
+          form: result.ThreeDSMethod.MethodForm.replace('target', '')
+        };
+
+      case 'error':
+        await this.storage.delete(secureId);
+
+        return {
+          type: 'error',
+          error: result.ErrorDescription
+        };
+
+      default:
+        assertNever(result);
     }
   }
 
-  async process3DS(input: {
-    azulOrderId: string;
-    methodNotificationStatus: MethodNotificationStatus;
-  }) {
-    return await this.requester.request(
-      {
-        azulOrderId: input.azulOrderId,
-        methodNotificationStatus: input.methodNotificationStatus
+  async processChallenge(input: { CRes: string; secureId: string }): Promise<SaleResponse> {
+    const azulOrderId = await this.storage.get(input.secureId);
+
+    if (!azulOrderId) {
+      throw new Error('Secure ID not found');
+    }
+
+    return processThreeDSChallenge({
+      input: {
+        requester: this.requester,
+        body: {
+          azulOrderId,
+          CRes: input.CRes
+        }
       },
-      'ProcessThreedsMethod'
-    );
-  }
-
-  async post3DS(id: string, cRes: string) {
-    const session = this.securePaymentSessions.get(id);
-
-    if (typeof session === 'undefined') {
-      throw new Error('Invalid ID');
-    }
-
-    return await this.process3DsChallenge({
-      azulOrderId: session.azulOrderId,
-      cRes
+      idempotencyKey: `process-challenge-${input.secureId}`
     });
   }
 
-  private async process3DsChallenge(input: { azulOrderId: string; cRes: string }) {
-    return await this.requester.request(
-      {
-        azulOrderId: input.azulOrderId,
-        cRes: input.cRes
+  async processMethod({
+    secureId
+  }: {
+    secureId: string;
+  }): Promise<SuccessResponse | ChallengeResponse | ErrorResponse> {
+    const azulOrderId = await this.storage.get(secureId);
+
+    if (!azulOrderId) {
+      throw new Error('Secure ID not found');
+    }
+
+    const response = await processThreeDSMethod({
+      input: {
+        azulOrderId,
+        requester: this.requester
       },
-      'ProcessThreedsChallenge'
-    );
-  }
-
-  async capture3DS(id: string): Promise<
-    | {
-        redirect: true;
-        html: string;
-      }
-    | {
-        redirect: false;
-        value: any;
-      }
-  > {
-    if (!this.securePaymentSessions.has(id)) {
-      throw new Error('Invalid ID');
-    }
-
-    const process3DResult = await this.get3DResult(id);
-
-    if (process3DResult.ResponseMessage === '3D_SECURE_CHALLENGE') {
-      return {
-        redirect: true,
-        html: challengeResponse({
-          creq: process3DResult.ThreeDSChallenge.CReq,
-          termUrl: this.securePaymentSessions.get(id)!.termUrl,
-          redirectPostUrl: process3DResult.ThreeDSChallenge.RedirectPostUrl
-        })
-      };
-    }
-
-    return {
-      redirect: false,
-      value: process3DResult
-    };
-  }
-
-  private processResult = new Map<string, any>();
-  private processLoading = new Map<string, boolean>();
-
-  private async get3DResult(id: string) {
-    // If we already have the result, return it
-    if (this.processResult.has(id)) {
-      return this.processResult.get(id);
-    }
-
-    // If we are already processing the result, wait for it to finish
-    if (this.processLoading.get(id)) {
-      while (this.processLoading.get(id)) {
-        await sleep(100);
-      }
-
-      return this.processResult.get(id);
-    }
-
-    // Otherwise, start processing the result
-    this.processLoading.set(id, true);
-    const result = await this.process3DS({
-      azulOrderId: this.securePaymentSessions.get(id)!.azulOrderId,
-      methodNotificationStatus: MethodNotificationStatus.RECEIVED
+      idempotencyKey: `process-method-${secureId}`
     });
-    this.processLoading.set(id, false);
 
-    this.processResult.set(id, result);
-    return result;
+    switch (response.type) {
+      case 'success':
+        await this.storage.delete(secureId);
+        return {
+          type: 'success',
+          azulOrderId: response.AzulOrderId
+        };
+
+      case 'challenge':
+        return {
+          type: 'challenge',
+          form: this.generateThreeDSChallengeResponseForm({
+            response,
+            secureId
+          })
+        };
+
+      case 'error':
+        return {
+          type: 'error',
+          error: response.ErrorDescription
+        };
+
+      default:
+        assertNever(response);
+    }
   }
-}
 
-function challengeResponse({
-  creq,
-  termUrl,
-  redirectPostUrl
-}: {
-  creq: string;
-  termUrl: string;
-  redirectPostUrl: string;
-}) {
-  return `
-  <form action="${redirectPostUrl}" method="POST">
-    <input type="hidden" name="creq" value="${creq}" />
-    <input type="hidden" name="TermUrl" value="${termUrl}" />
-    <script>
-      window.onload = function() {
-        document.forms[0].submit();
-      }
-    </script>
-  </form>`;
+  private generateThreeDSChallengeResponseForm({
+    response,
+    secureId
+  }: {
+    response: ThreeDSChallengeResponse;
+    secureId: string;
+  }): string {
+    return `
+    <form action="${response.ThreeDSChallenge.RedirectPostUrl}" method="POST">
+      <input type="hidden" name="creq" value="${response.ThreeDSChallenge.CReq}" />
+      <input type="hidden" name="TermUrl" value="${`${this.processChallengeBaseUrl}?secureId=${secureId}`}" />
+      <script>
+        window.onload = function() {
+          document.forms[0].submit();
+        }
+      </script>
+    </form>`;
+  }
 }

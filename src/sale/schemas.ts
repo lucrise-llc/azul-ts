@@ -6,7 +6,6 @@ import {
   amount,
   cardNumber,
   customOrderId,
-  dataVaultToken,
   expiration,
   posInputMode,
   saveToDataVault
@@ -30,7 +29,7 @@ export const tokenPaymentSchema = z.object({
   customOrderId,
   amount,
   ITBIS,
-  dataVaultToken,
+  dataVaultToken: z.string().max(36),
   posInputMode,
   expiration: z.literal('').default('')
 });
@@ -39,7 +38,7 @@ export const saleRequestSchema = z.union([cardPaymentSchema, tokenPaymentSchema]
 export type SaleRequest = z.input<typeof saleRequestSchema>;
 
 // Sale Response
-const successfulSaleResponseSchema = z
+export const successfulSaleResponseSchema = z
   .object({
     IsoCode: z.literal('00'),
     AzulOrderId: z.string().nonempty(),
@@ -59,7 +58,7 @@ const successfulSaleResponseSchema = z
     type: 'success' as const
   }));
 
-const errorSaleResponseSchema = z
+export const errorSaleResponseSchema = z
   .object({
     IsoCode: z.string(),
     AzulOrderId: z.string().optional(),

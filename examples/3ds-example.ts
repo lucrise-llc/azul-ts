@@ -1,6 +1,7 @@
 import express from 'express';
-import AzulAPI from '../src/api';
-import { ChallengeIndicator } from '../src/secure/types';
+
+import { env } from '../src/tests/instance';
+import { AzulSecure } from '../src/secure/secure';
 import 'dotenv/config';
 
 const app = express();
@@ -33,12 +34,14 @@ const CARDS = [
   }
 ];
 
-const azul = new AzulAPI({
-  auth1: process.env.AUTH1!,
-  auth2: process.env.AUTH2!,
-  merchantId: process.env.MERCHANT_ID!,
-  certificate: process.env.AZUL_CERT!,
-  key: process.env.AZUL_KEY!
+const azul = new AzulSecure({
+  auth1: env.AUTH1,
+  auth2: env.AUTH2,
+  merchantId: env.MERCHANT_ID,
+  certificate: env.AZUL_CERT,
+  key: env.AZUL_KEY,
+  processMethodBaseUrl: 'http://localhost:3000/process-method',
+  processChallengeBaseUrl: 'http://localhost:3000/process-challenge'
 });
 
 app.get('/', (req, res) => {
@@ -60,84 +63,75 @@ app.get('/buy', async (req, res) => {
     return res.status(400).send('Invalid card number');
   }
 
-  const result = await azul.secure.sale({
+  const result = await azul.secureSale({
+    type: 'card',
     cardNumber,
-    expiration: '202412',
     CVC: '818',
     customOrderId: '1234',
     amount: 1000,
     ITBIS: 100,
-    browserInfo: {
-      AcceptHeader:
-        'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signedexchange;v=b3;q=0.9',
-      IPAddress: '127.0.0.1',
-      Language: 'en-US',
-      ColorDepth: '24',
-      ScreenWidth: '2880',
-      ScreenHeight: '1800',
-      TimeZone: '240',
-      UserAgent:
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36',
-      JavaScriptEnabled: true
-    },
-    cardHolderInfo: {
-      BillingAddressCity: 'Ciudad Facturación',
-      BillingAddressCountry: 'País Facturación',
-      BillingAddressLine1: 'Línea 1 Dirección Facturación',
-      BillingAddressLine2: 'Línea 2 Dirección Facturación',
-      BillingAddressLine3: 'Línea 3 Dirección Facturación',
-      BillingAddressState: 'Estado o Provincia Facturación',
-      BillingAddressZip: '99999',
-      Email: 'correo@dominio.com',
-      Name: 'Nombre Tarjetahabiente',
-      PhoneHome: '8099999999',
-      PhoneMobile: '8299999999',
-      PhoneWork: '8499999999',
-      ShippingAddressCity: 'Ciudad Envío',
-      ShippingAddressCountry: 'País Envío',
-      ShippingAddressLine1: 'Línea 1 Dirección Envío',
-      ShippingAddressLine2: 'Línea 2 Dirección Envío',
-      ShippingAddressLine3: 'Línea 3 Dirección Envío',
-      ShippingAddressState: 'Estado o Provincia Facturación',
-      ShippingAddressZip: '99999'
-    },
-    threeDSAuth: {
-      TermUrl: 'http://localhost:3000/post-3ds',
-      MethodNotificationUrl: 'http://localhost:3000/capture-3ds',
-      RequestorChallengeIndicator: ChallengeIndicator.NO_PREFERENCE
-    }
+    expiration: '202512'
   });
 
-  if (result.redirect) {
-    res.send(result.html);
-  } else {
-    if (result.value.IsoCode === '00') {
-      res.send(result.value);
-    } else {
-      res.status(500).send('Error');
-    }
+  if (result.type === 'success') {
+    res.send('Payment successful');
+  }
+
+  if (result.type === 'challenge') {
+    res.send(result.form);
+  }
+
+  if (result.type === 'method') {
+    res.send(result.form);
+  }
+
+  if (result.type === 'error') {
+    res.status(500).send(`Payment failed: ${result.error}`);
   }
 });
 
-app.post('/post-3ds', async (req, res) => {
-  const { id } = req.query;
+app.post('/process-challenge', async (req, res) => {
+  const { secureId } = req.query;
   const { cres } = req.body;
 
-  if (typeof id !== 'string' || typeof cres !== 'string') {
+  if (typeof secureId !== 'string' || typeof cres !== 'string') {
     return res.status(400).send('Invalid ID');
   }
 
-  res.send(await azul.secure.post3DS(id, cres));
+  const result = await azul.processChallenge({
+    secureId,
+    CRes: cres
+  });
+
+  if (result.type === 'success') {
+    res.send('Payment successful');
+  }
+
+  if (result.type === 'error') {
+    res.status(500).send(`Payment failed: ${result.ErrorDescription}`);
+  }
 });
 
-app.post('/capture-3ds', async (req, res) => {
-  const id = req.query.id;
+app.post('/process-method', async (req, res) => {
+  const { secureId } = req.query;
 
-  if (typeof id !== 'string') {
+  if (typeof secureId !== 'string') {
     return res.status(400).send('Invalid ID');
   }
 
-  res.send(await azul.secure.capture3DS(id));
+  const result = await azul.processMethod({ secureId });
+
+  if (result.type === 'success') {
+    res.send('Payment successful');
+  }
+
+  if (result.type === 'challenge') {
+    res.send(result.form);
+  }
+
+  if (result.type === 'error') {
+    res.status(500).send(`Payment failed: ${result.error}`);
+  }
 });
 
 app.listen(3000);
