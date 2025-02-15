@@ -5,16 +5,40 @@ on:
       - 'src/**'
       - 'tests/**'
       - '.github/workflows/release.yaml'
+    branches: [ main, master ]
   pull_request:
     paths:
       - 'src/**'
       - 'tests/**'
       - '.github/workflows/release.yaml'
+    branches: [ main, master ]
 
 permissions:
   contents: read
 
 jobs:
+  e2e-tests:
+    name: Run E2E tests
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+      - name: Install dependencies
+        run: npm ci
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+      - name: Run Playwright tests
+        run: npx playwright test
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+
   integration-tests:
     name: Run integration tests
     runs-on: ubuntu-latest
@@ -35,7 +59,7 @@ jobs:
 
   release:
     name: Release
-    needs: integration-tests
+    needs: [integration-tests, e2e-tests]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
