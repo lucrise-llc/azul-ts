@@ -2,19 +2,14 @@ import z from 'zod';
 
 import { cardPaymentSchema, tokenPaymentSchema } from '../sale/schemas';
 
+const refund = z.object({
+  azulOrderId: z.string(),
+  trxType: z.literal('Refund').default('Refund')
+});
+
 export const refundRequestSchema = z.union([
-  cardPaymentSchema.merge(
-    z.object({
-      azulOrderId: z.string(),
-      trxType: z.literal('Refund').default('Refund')
-    })
-  ),
-  tokenPaymentSchema.merge(
-    z.object({
-      azulOrderId: z.string(),
-      trxType: z.literal('Refund').default('Refund')
-    })
-  )
+  cardPaymentSchema.merge(refund).omit({ CVC: true }),
+  tokenPaymentSchema.merge(refund)
 ]);
 
 export type RefundRequestInput = z.input<typeof refundRequestSchema>;
