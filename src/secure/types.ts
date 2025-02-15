@@ -1,15 +1,3 @@
-import { z } from 'zod';
-
-import type { saleRequestSchema } from '../sale/schemas';
-
-export type SecureSale = z.infer<typeof saleRequestSchema> & {
-  cardHolderInfo: Partial<CardHolderInfo>;
-  browserInfo: Partial<BrowserInfo>;
-  threeDSAuth: ThreeDSAuth;
-} & {
-  useIframe?: boolean;
-};
-
 export enum ChallengeIndicator {
   /**
    * Sin preferencias (no tiene preferencia si se debe realizar un desafío.
@@ -58,45 +46,6 @@ export enum MethodNotificationStatus {
    */
   NOT_EXPECTED = 'NOT_EXPECTED'
 }
-
-export type ThreeDSAuth = {
-  /**
-   * URL del comercio donde serán posteados los valores de
-   * respuesta con el resultado de la autenticación por el servidor
-   * ACS (este es el servidor del banco emisor que procesa la
-   * autenticación del tarjetahabiente). Se deber construir con un
-   * identificador único que sirva para asociar
-   */
-  TermUrl: string;
-
-  /**
-   * URL del comercio donde se recibirá la notificación de que se
-   * completó el iFrame (el cual se hará referencia más adelante) y
-   * capturó los datos del navegador para ser usados en el análisis de
-   * riesgo.
-   *
-   * Esta notificación debe llegar mediante un HTTP Post del
-   * servidor ACS del emisor y contiene un identificador único de
-   * transacción representado con el threeDSServerTransID. Esta
-   * URL debe ser única e identificable, por lo que cuando se reciba
-   * la notificación, debería poder asociarse con la transacción
-   * correspondiente. Esto elimina cualquier dependencia del
-   * threeDSServerTransID, que se recibe con la respuesta del nodo
-   * ThreeDSMethod.
-   *
-   * Una forma sencilla de garantizar el mapeo correcto con las
-   * transacciones es pasar una referencia de transacción como un
-   * query string. Por ejemplo:
-   * “http://www.mitienda.com/3dscapture.aspx?sid=637195280075507073"
-   */
-  MethodNotificationUrl: string;
-
-  /**
-   * Este indicador sirve para comunicar al banco emisor la
-   * preferencia que tiene comercio de que se solicite el desafío
-   */
-  RequestorChallengeIndicator: ChallengeIndicator;
-};
 
 export type CardHolderInfo = {
   /**
