@@ -6,8 +6,8 @@ import { env } from '../tests/instance';
 describe('Azul secure', () => {
   it('Test secure sale', async () => {
     const secure = new AzulSecure({
-      auth1: env.AUTH1,
-      auth2: env.AUTH2,
+      auth1: env.AUTH1_3DS,
+      auth2: env.AUTH1_3DS,
       merchantId: env.MERCHANT_ID,
       certificate: env.AZUL_CERT,
       key: env.AZUL_KEY,

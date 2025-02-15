@@ -9,34 +9,26 @@ app.use(express.urlencoded({ extended: true }));
 
 const CARDS = [
   {
-    value: '4149011500000519',
-    label: '3D Secure Method con desafío'
+    label: 'NO_CHALLENGE_3DS_METHOD',
+    card: '4265880000000007'
   },
   {
-    value: '4265880000000007',
-    label: 'Sin fricción con 3DSMethod'
+    label: 'NO_CHALLENGE_NO_3DS_METHOD',
+    card: '4147463011110117'
   },
   {
-    value: '4147463011110117',
-    label: 'Sin fricción sin 3DSMethod'
+    label: 'CHALLENGE_3DS_METHOD',
+    card: '4005520000000129'
   },
   {
-    value: '4005520000000129',
-    label: 'Desafío con 3DSMethod'
-  },
-  {
-    value: '4147463011110059',
-    label: 'Desafío sin 3DSMethod'
-  },
-  {
-    value: '4149011500000527',
-    label: 'Desafío'
+    label: 'CHALLENGE_NO_3DS_METHOD',
+    card: '4147463011110059'
   }
 ];
 
 const azul = new AzulSecure({
-  auth1: env.AUTH1,
-  auth2: env.AUTH2,
+  auth1: env.AUTH1_3DS,
+  auth2: env.AUTH1_3DS,
   merchantId: env.MERCHANT_ID,
   certificate: env.AZUL_CERT,
   key: env.AZUL_KEY,
@@ -45,15 +37,17 @@ const azul = new AzulSecure({
 });
 
 app.get('/', (req, res) => {
-  res.send(
-    `
-    <h1>3DS Example</h1>
-    <h2>Choose a card</h2>
-    ${CARDS.map(
-      (card) => `<a href="/buy?cardNumber=${card.value}"><button>${card.label}</button></a>`
-    ).join('<br><br>')}
-    `
-  );
+  let page = `
+  <h1>3DS Example</h1>
+  <h2>Choose a card</h2>
+  `;
+
+  for (const { label, card } of CARDS) {
+    page += `<a href="/buy?cardNumber=${card}" id=${label}>${label}</a>`;
+    page += '<br></br>';
+  }
+
+  res.send(page);
 });
 
 app.get('/buy', async (req, res) => {
@@ -134,4 +128,6 @@ app.post('/process-method', async (req, res) => {
   }
 });
 
-app.listen(3000);
+app.listen(3000, () => {
+  console.log('Server is running on http://localhost:3000');
+});
