@@ -32,12 +32,11 @@ jobs:
         run: npx playwright install --with-deps
       - name: Run Playwright tests
         env:
-          AUTH1: ${{ secrets.AUTH1 }}
-          AUTH2: ${{ secrets.AUTH2 }}
-          AUTH1_3DS: ${{ secrets.AUTH1_3DS }}
-          AUTH2_3DS: ${{ secrets.AUTH2_3DS }}
+          AUTH1: ${{ secrets.AUTH1_3DS }}
+          AUTH2: ${{ secrets.AUTH2_3DS }}
           MERCHANT_ID: ${{ secrets.MERCHANT_ID }}
           AZUL_KEY: ${{ secrets.AZUL_KEY }}
+          AZUL_CERT: ${{ secrets.AZUL_CERT }}
         run: npx playwright test
       - uses: actions/upload-artifact@v4
         if: always()
