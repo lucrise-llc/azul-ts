@@ -5,13 +5,13 @@ on:
       - 'src/**'
       - 'tests/**'
       - '.github/workflows/release.yaml'
-    branches: [ main, master ]
+    branches: [main, master]
   pull_request:
     paths:
       - 'src/**'
       - 'tests/**'
       - '.github/workflows/release.yaml'
-    branches: [ main, master ]
+    branches: [main, master]
 
 permissions:
   contents: read
