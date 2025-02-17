@@ -16,7 +16,7 @@ import { RefundRequestInput, RefundResponse } from './refund/schemas';
 
 export class Azul {
   public readonly vault: DataVault;
-  private readonly requester: AzulRequester;
+  protected readonly requester: AzulRequester;
 
   constructor(config: Config) {
     config.key = parsePEM(config.key, 'key');

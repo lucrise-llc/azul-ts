@@ -1,61 +1,45 @@
 import { randomUUID } from 'crypto';
 
-import { SaleResponse } from '../sale/schemas';
+import { Azul } from '../api';
+import { Config } from '../request';
 import { processThreeDSMethod } from './method';
-import AzulRequester, { Config } from '../request';
-import { assertNever } from '../utils/assert-never';
-import { ThreeDSChallengeResponse } from './schemas';
 import { processThreeDSChallenge } from './challenge';
-import { parsePEM } from '../parse-certificate/parse-certificate';
+import { ThreeDSChallengeResponse, ThreeDSMethodResponse } from './schemas';
+import { SuccessfulSaleResponse, ErrorSaleResponse } from '../sale/schemas';
 import { secureSale, SecureSaleRequest, secureSaleRequestSchema } from './sale';
-
-type SuccessResponse = {
-  type: 'success';
-  azulOrderId: string;
-};
-
-type ChallengeResponse = {
-  type: 'challenge';
-  form: string;
-};
-
-type MethodResponse = {
-  type: 'method';
-  form: string;
-};
-
-type ErrorResponse = {
-  type: 'error';
-  error: string;
-};
 
 export type SecureConfig = Config & {
   processMethodBaseUrl: string;
   processChallengeBaseUrl: string;
 };
 
-export class AzulSecure {
+type ThreeDSChallengeResponseWithForm = ThreeDSChallengeResponse & {
+  form: string;
+};
+
+export class AzulSecure extends Azul {
   private readonly storage = new Map<string, string>();
   public processMethodBaseUrl: string;
   public processChallengeBaseUrl: string;
-  public requester: AzulRequester;
 
   constructor(config: SecureConfig) {
-    config.key = parsePEM(config.key, 'key');
-    config.certificate = parsePEM(config.certificate, 'certificate');
-
-    this.requester = new AzulRequester(config);
+    super(config);
     this.processMethodBaseUrl = config.processMethodBaseUrl;
     this.processChallengeBaseUrl = config.processChallengeBaseUrl;
   }
 
   async secureSale(
     input: SecureSaleRequest
-  ): Promise<SuccessResponse | ChallengeResponse | MethodResponse | ErrorResponse> {
-    const secureId = randomUUID();
+  ): Promise<
+    | SuccessfulSaleResponse
+    | ThreeDSChallengeResponseWithForm
+    | ThreeDSMethodResponse
+    | ErrorSaleResponse
+  > {
+    const secureId = input.secureId ? input.secureId : randomUUID();
     const parsedInput = secureSaleRequestSchema.parse(input);
 
-    const result = await secureSale({
+    const response = await secureSale({
       input: {
         ...parsedInput,
         ThreeDSAuth: {
@@ -67,55 +51,31 @@ export class AzulSecure {
       requester: this.requester
     });
 
-    switch (result.type) {
-      case 'success':
-        await this.storage.delete(secureId);
-
-        return {
-          type: 'success',
-          azulOrderId: result.AzulOrderId
-        };
-
-      case 'challenge':
-        this.storage.set(secureId, result.AzulOrderId);
-
-        return {
-          type: 'challenge',
-          form: this.generateThreeDSChallengeResponseForm({
-            response: result,
-            secureId
-          })
-        };
-
-      case 'method':
-        this.storage.set(secureId, result.AzulOrderId);
-
-        return {
-          type: 'method',
-          form: result.ThreeDSMethod.MethodForm.replace('target', '')
-        };
-
-      case 'error':
-        await this.storage.delete(secureId);
-
-        return {
-          type: 'error',
-          error: result.ErrorDescription
-        };
-
-      default:
-        assertNever(result);
+    if (response.type === 'challenge' || response.type === 'method') {
+      this.storage.set(secureId, response.AzulOrderId);
     }
+
+    if (response.type === 'challenge') {
+      return {
+        ...response,
+        form: this.generateThreeDSChallengeResponseForm({ response, secureId })
+      };
+    }
+
+    return response;
   }
 
-  async processChallenge(input: { CRes: string; secureId: string }): Promise<SaleResponse> {
-    const azulOrderId = await this.storage.get(input.secureId);
+  async processChallenge(input: {
+    CRes: string;
+    secureId: string;
+  }): Promise<SuccessfulSaleResponse | ErrorSaleResponse> {
+    const azulOrderId = this.storage.get(input.secureId);
 
     if (!azulOrderId) {
       throw new Error('Secure ID not found');
     }
 
-    return processThreeDSChallenge({
+    const response = await processThreeDSChallenge({
       input: {
         requester: this.requester,
         body: {
@@ -125,14 +85,17 @@ export class AzulSecure {
       },
       idempotencyKey: `process-challenge-${input.secureId}`
     });
+
+    this.storage.delete(input.secureId);
+    return response;
   }
 
   async processMethod({
     secureId
   }: {
     secureId: string;
-  }): Promise<SuccessResponse | ChallengeResponse | ErrorResponse> {
-    const azulOrderId = await this.storage.get(secureId);
+  }): Promise<SuccessfulSaleResponse | ThreeDSChallengeResponseWithForm | ErrorSaleResponse> {
+    const azulOrderId = this.storage.get(secureId);
 
     if (!azulOrderId) {
       throw new Error('Secure ID not found');
@@ -146,32 +109,18 @@ export class AzulSecure {
       idempotencyKey: `process-method-${secureId}`
     });
 
-    switch (response.type) {
-      case 'success':
-        await this.storage.delete(secureId);
-        return {
-          type: 'success',
-          azulOrderId: response.AzulOrderId
-        };
-
-      case 'challenge':
-        return {
-          type: 'challenge',
-          form: this.generateThreeDSChallengeResponseForm({
-            response,
-            secureId
-          })
-        };
-
-      case 'error':
-        return {
-          type: 'error',
-          error: response.ErrorDescription
-        };
-
-      default:
-        assertNever(response);
+    if (response.type === 'success' || response.type === 'error') {
+      this.storage.delete(secureId);
     }
+
+    if (response.type === 'challenge') {
+      return {
+        ...response,
+        form: this.generateThreeDSChallengeResponseForm({ response, secureId })
+      };
+    }
+
+    return response;
   }
 
   private generateThreeDSChallengeResponseForm({

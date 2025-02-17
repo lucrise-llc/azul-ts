@@ -1,4 +1,4 @@
 import { Azul } from './api';
+import { AzulSecure } from './secure/secure';
 
-export { Azul };
-export * from './secure/types';
+export { Azul, AzulSecure };

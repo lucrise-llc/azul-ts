@@ -19,9 +19,11 @@ const threeDSAuthSchema = z.object({
 
 export const secureSaleRequestSchema = z.union([
   cardPaymentSchema.extend({
+    secureId: z.string().optional(),
     ThreeDSAuth: threeDSAuthSchema.optional()
   }),
   tokenPaymentSchema.extend({
+    secureId: z.string().optional(),
     ThreeDSAuth: threeDSAuthSchema.optional()
   })
 ]);

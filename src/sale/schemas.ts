@@ -58,6 +58,8 @@ export const successfulSaleResponseSchema = z
     type: 'success' as const
   }));
 
+export type SuccessfulSaleResponse = z.infer<typeof successfulSaleResponseSchema>;
+
 export const errorSaleResponseSchema = z
   .object({
     IsoCode: z.string(),
@@ -76,6 +78,8 @@ export const errorSaleResponseSchema = z
     ...response,
     type: 'error' as const
   }));
+
+export type ErrorSaleResponse = z.infer<typeof errorSaleResponseSchema>;
 
 export const saleResponseSchema = z.union([successfulSaleResponseSchema, errorSaleResponseSchema]);
 export type SaleResponse = z.infer<typeof saleResponseSchema>;

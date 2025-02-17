@@ -80,7 +80,7 @@ app.get('/buy', async (req, res) => {
   }
 
   if (result.type === 'error') {
-    res.status(500).send(`Payment failed: ${result.error}`);
+    res.status(500).send(`Payment failed: ${result.ErrorDescription}`);
   }
 });
 
@@ -124,7 +124,7 @@ app.post('/process-method', async (req, res) => {
   }
 
   if (result.type === 'error') {
-    res.status(500).send(`Payment failed: ${result.error}`);
+    res.status(500).send(`Payment failed: ${result.ErrorDescription}`);
   }
 });
 
