@@ -1,3 +1,5 @@
+import { EventEmitter } from 'stream';
+
 import { sale } from './sale/sale';
 import { post } from './post/post';
 import { hold } from './hold/hold';
@@ -14,15 +16,16 @@ import { SearchRequest, SearchResponse } from './search/schemas';
 import { parsePEM } from './parse-certificate/parse-certificate';
 import { RefundRequestInput, RefundResponse } from './refund/schemas';
 
-export class Azul {
+export class Azul extends EventEmitter {
   public readonly vault: DataVault;
   protected readonly requester: AzulRequester;
 
   constructor(config: Config) {
+    super();
     config.key = parsePEM(config.key, 'key');
     config.certificate = parsePEM(config.certificate, 'certificate');
 
-    this.requester = new AzulRequester(config);
+    this.requester = new AzulRequester(config, this);
     this.vault = new DataVault(this.requester);
   }
 

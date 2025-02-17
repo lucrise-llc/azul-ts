@@ -1,3 +1,4 @@
+import EventEmitter from 'events';
 import { request, Agent } from 'undici';
 
 import { capitalizeKeys } from './utils/capitalize';
@@ -27,13 +28,15 @@ class AzulRequester {
   private certificate: string;
   private key: string;
   private readonly agent: Agent;
+  private readonly eventEmitter: EventEmitter;
 
-  constructor(config: Config) {
+  constructor(config: Config, eventEmitter: EventEmitter) {
     this.auth1 = config.auth1;
     this.auth2 = config.auth2;
     this.merchantId = config.merchantId;
     this.certificate = config.certificate;
     this.key = config.key;
+    this.eventEmitter = eventEmitter;
 
     if (config.channel === undefined) {
       this.channel = 'EC';
@@ -62,6 +65,8 @@ class AzulRequester {
       ...body
     });
 
+    this.eventEmitter.emit('request', { url, requestBody });
+
     const response = await request(url, {
       method: 'POST',
       headers: {
@@ -73,8 +78,11 @@ class AzulRequester {
       body: JSON.stringify(requestBody)
     });
 
-    const json = await response.body.json();
-    return json;
+    const responseBody = await response.body.json();
+
+    this.eventEmitter.emit('response', { url, responseBody });
+
+    return responseBody;
   }
 }
 
