@@ -1,4 +1,4 @@
-import { EventEmitter } from 'stream';
+import { EventEmitter } from 'node:events';
 
 import { sale } from './sale/sale';
 import { post } from './post/post';
