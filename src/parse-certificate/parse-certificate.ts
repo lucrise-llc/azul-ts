@@ -88,7 +88,7 @@ function decodeBase64(value: string): string | null {
 }
 
 /**
- * PEM format headers and footers
+ * PEM format header and footer
  */
 const PEM_MARKERS = {
   certificate: {
