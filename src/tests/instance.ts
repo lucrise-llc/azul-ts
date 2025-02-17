@@ -8,6 +8,8 @@ config();
 const envSchema = z.object({
   AUTH1: z.string(),
   AUTH2: z.string(),
+  AUTH1_3DS: z.string(),
+  AUTH2_3DS: z.string(),
   MERCHANT_ID: z.string(),
   AZUL_CERT: z.string(),
   AZUL_KEY: z.string()

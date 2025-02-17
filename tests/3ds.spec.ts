@@ -1,8 +1,6 @@
 import { test } from '@playwright/test';
 
 test.describe('3DS Payment Tests', () => {
-  test.describe.configure({ retries: 3 });
-
   test('No challenge and no 3DS method', async ({ page }) => {
     await page.goto('http://localhost:3000');
     await page.click(`a[id=NO_CHALLENGE_NO_3DS_METHOD]`);
