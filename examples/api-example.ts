@@ -1,28 +1,36 @@
 import express from 'express';
-import AzulAPI from '../src/api';
+
+import { Azul } from '../src/api';
+import { env } from '../src/tests/instance';
 import 'dotenv/config';
 
 const app = express();
 
-const azul = new AzulAPI({
-  auth1: process.env.AUTH1!,
-  auth2: process.env.AUTH2!,
-  merchantId: process.env.MERCHANT_ID!,
-  certificate: process.env.AZUL_CERT!,
-  key: process.env.AZUL_KEY!
+const azul = new Azul({
+  auth1: env.AUTH1,
+  auth2: env.AUTH2,
+  merchantId: env.MERCHANT_ID,
+  certificate: env.AZUL_CERT,
+  key: env.AZUL_KEY
 });
 
-app.get('/buy-ticket', async (req, res) => {
-  const result = await azul.payments.sale({
+app.get('/buy', async (req, res) => {
+  const result = await azul.sale({
+    type: 'card',
     cardNumber: '6011000990099818',
     expiration: '202412',
     CVC: '818',
-    customOrderId: '1234',
     amount: 1000,
     ITBIS: 100
   });
 
-  res.send(result);
+  if (result.type === 'success') {
+    res.send('Success');
+  }
+
+  if (result.type === 'error') {
+    res.status(500).send(`Payment failed: ${result.ErrorDescription}`);
+  }
 });
 
 app.listen(3000);
