@@ -33,12 +33,12 @@ $ npm install @lucrise/azul-ts
 
 ## API (WebService)
 
-To use the Azul API, you need to initialize the `AzulAPI` class with your merchant ID, auth keys, and certificates.
+To use the Azul API, you need to initialize the `Azul` class with your merchant ID, auth keys, and certificates.
 
 ```typescript
-import AzulAPI from '@lucrise/azul-ts';
+import { Azul } from '@lucrise/azul-ts';
 
-const azul = new AzulAPI({
+const azul = new Azul({
   auth1: 'your-auth1',
   auth2: 'your-auth2',
   merchantId: 'your-merchant-id',
