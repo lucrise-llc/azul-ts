@@ -12,6 +12,7 @@
   "scripts": {
     "prepare": "husky install",
     "test": "vitest run",
+    "test:3ds": "npx playwright test",
     "build": "rm -rf dist && tsc && tsc-alias -p tsconfig.json && cp package.json dist/package.json",
     "start": "npm run build && node dist/index.js",
     "start:3ds-example": "npx tsx examples/3ds-example.ts"
