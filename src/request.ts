@@ -1,5 +1,5 @@
 import EventEmitter from 'node:events';
-import { request, Agent } from 'undici';
+import { request, Agent, Dispatcher } from 'undici';
 
 import { capitalizeKeys } from './utils/capitalize';
 
@@ -78,11 +78,21 @@ class AzulRequester {
       body: JSON.stringify(requestBody)
     });
 
-    const responseBody = await response.body.json();
+    const responseBody = await parseJSON(response);
 
     this.eventEmitter.emit('response', { url, responseBody });
 
     return responseBody;
+  }
+}
+
+async function parseJSON(response: Dispatcher.ResponseData): Promise<unknown> {
+  const text = await response.body.text();
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error('Did not receive JSON, instead received: ' + text);
   }
 }
 
