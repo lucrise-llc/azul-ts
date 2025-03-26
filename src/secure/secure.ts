@@ -2,8 +2,10 @@ import { randomUUID } from 'crypto';
 
 import { Azul } from '../api';
 import { Config } from '../request';
-import { processThreeDSMethod } from './method';
-import { processThreeDSChallenge } from './challenge';
+import { processThreeDSMethodInternal } from './method';
+import { MemoryStorage, Storage } from '../utils/storage';
+import { callIdempotent } from '../utils/call-idempotent';
+import { processThreeDSChallengeInternal } from './challenge';
 import { ThreeDSChallengeResponse, ThreeDSMethodResponse } from './schemas';
 import { SuccessfulSaleResponse, ErrorSaleResponse } from '../sale/schemas';
 import { secureSale, SecureSaleRequest, secureSaleRequestSchema } from './sale';
@@ -11,14 +13,17 @@ import { secureSale, SecureSaleRequest, secureSaleRequestSchema } from './sale';
 export type SecureConfig = Config & {
   processMethodBaseUrl: string;
   processChallengeBaseUrl: string;
+  storage?: Storage;
 };
 
 type ThreeDSChallengeResponseWithForm = ThreeDSChallengeResponse & {
   form: string;
 };
 
+const secureIdPrefix = 'secure-id';
+
 export class AzulSecure extends Azul {
-  private readonly storage = new Map<string, string>();
+  private readonly storage: Storage;
   public processMethodBaseUrl: string;
   public processChallengeBaseUrl: string;
 
@@ -26,6 +31,7 @@ export class AzulSecure extends Azul {
     super(config);
     this.processMethodBaseUrl = config.processMethodBaseUrl;
     this.processChallengeBaseUrl = config.processChallengeBaseUrl;
+    this.storage = config.storage || new MemoryStorage();
   }
 
   async secureSale(
@@ -52,7 +58,7 @@ export class AzulSecure extends Azul {
     });
 
     if (response.type === 'challenge' || response.type === 'method') {
-      this.storage.set(secureId, response.AzulOrderId);
+      await this.storage.set(`${secureIdPrefix}:${secureId}`, response.AzulOrderId);
     }
 
     if (response.type === 'challenge') {
@@ -69,13 +75,15 @@ export class AzulSecure extends Azul {
     CRes: string;
     secureId: string;
   }): Promise<SuccessfulSaleResponse | ErrorSaleResponse> {
-    const azulOrderId = this.storage.get(input.secureId);
+    const azulOrderId = await this.storage.get(`${secureIdPrefix}:${input.secureId}`);
 
     if (!azulOrderId) {
       throw new Error('Secure ID not found');
     }
 
-    const response = await processThreeDSChallenge({
+    const response = await callIdempotent({
+      storage: this.storage,
+      fn: processThreeDSChallengeInternal,
       input: {
         requester: this.requester,
         body: {
@@ -86,7 +94,7 @@ export class AzulSecure extends Azul {
       idempotencyKey: `process-challenge-${input.secureId}`
     });
 
-    this.storage.delete(input.secureId);
+    await this.storage.delete(`${secureIdPrefix}:${input.secureId}`);
     return response;
   }
 
@@ -95,13 +103,15 @@ export class AzulSecure extends Azul {
   }: {
     secureId: string;
   }): Promise<SuccessfulSaleResponse | ThreeDSChallengeResponseWithForm | ErrorSaleResponse> {
-    const azulOrderId = this.storage.get(secureId);
+    const azulOrderId = await this.storage.get(`${secureIdPrefix}:${secureId}`);
 
     if (!azulOrderId) {
       throw new Error('Secure ID not found');
     }
 
-    const response = await processThreeDSMethod({
+    const response = await callIdempotent({
+      storage: this.storage,
+      fn: processThreeDSMethodInternal,
       input: {
         azulOrderId,
         requester: this.requester
@@ -110,7 +120,7 @@ export class AzulSecure extends Azul {
     });
 
     if (response.type === 'success' || response.type === 'error') {
-      this.storage.delete(secureId);
+      await this.storage.delete(`${secureIdPrefix}:${secureId}`);
     }
 
     if (response.type === 'challenge') {

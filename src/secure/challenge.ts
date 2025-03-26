@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
 import AzulRequester from '../request';
-import { makeIdempotent } from '../utils/make-idempotent';
 import { SaleResponse, saleResponseSchema } from '../sale/schemas';
 
 const processThreeDSChallengeRequestSchema = z.object({
@@ -11,7 +10,7 @@ const processThreeDSChallengeRequestSchema = z.object({
 
 export type ProcessThreeDSChallengeRequest = z.infer<typeof processThreeDSChallengeRequestSchema>;
 
-async function processThreeDSChallengeInternal({
+export async function processThreeDSChallengeInternal({
   body,
   requester
 }: {
@@ -25,5 +24,3 @@ async function processThreeDSChallengeInternal({
 
   return saleResponseSchema.parse(response);
 }
-
-export const processThreeDSChallenge = makeIdempotent(processThreeDSChallengeInternal);

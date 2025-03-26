@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
 import AzulRequester from '../request';
-import { makeIdempotent } from '../utils/make-idempotent';
 import { threeDSChallengeResponseSchema } from './schemas';
 import { errorSaleResponseSchema, successfulSaleResponseSchema } from '../sale/schemas';
 
@@ -13,7 +12,7 @@ const processThreeDSMethodResponseSchema = z.union([
 
 export type ProcessThreeDSMethodResponse = z.infer<typeof processThreeDSMethodResponseSchema>;
 
-async function processThreeDSMethodInternal({
+export async function processThreeDSMethodInternal({
   azulOrderId,
   requester
 }: {
@@ -30,5 +29,3 @@ async function processThreeDSMethodInternal({
 
   return processThreeDSMethodResponseSchema.parse(response);
 }
-
-export const processThreeDSMethod = makeIdempotent(processThreeDSMethodInternal);
