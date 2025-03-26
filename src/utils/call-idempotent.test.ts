@@ -78,8 +78,6 @@ describe('Call idempotent', () => {
       })
     ]);
 
-    console.log('firstResult, secondResult: ', firstResult, secondResult);
-
     assert(firstResult === secondResult);
   });
 
