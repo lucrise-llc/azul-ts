@@ -1,5 +1,4 @@
 import EventEmitter from 'node:events';
-import { request, Agent, Dispatcher } from 'undici';
 
 import { capitalizeKeys } from './utils/capitalize';
 
@@ -12,11 +11,12 @@ export type Config = {
   auth1: string;
   auth2: string;
   merchantId: string;
-  certificate: string;
-  key: string;
-  environment?: 'dev' | 'prod';
   channel?: string;
+  environment?: 'dev' | 'prod';
+  fetch?: Fetcher;
 };
+
+type Fetcher = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
 
 class AzulRequester {
   public readonly url: string;
@@ -25,18 +25,15 @@ class AzulRequester {
   private auth2: string;
   private channel: string;
   private merchantId: string;
-  private certificate: string;
-  private key: string;
-  private readonly agent: Agent;
+  private readonly fetch: Fetcher;
   private readonly eventEmitter: EventEmitter;
 
   constructor(config: Config, eventEmitter: EventEmitter) {
     this.auth1 = config.auth1;
     this.auth2 = config.auth2;
     this.merchantId = config.merchantId;
-    this.certificate = config.certificate;
-    this.key = config.key;
     this.eventEmitter = eventEmitter;
+    this.fetch = config.fetch || fetch;
 
     if (config.channel === undefined) {
       this.channel = 'EC';
@@ -49,13 +46,6 @@ class AzulRequester {
     } else {
       this.url = AzulURL.PROD;
     }
-
-    this.agent = new Agent({
-      connect: {
-        cert: this.certificate,
-        key: this.key
-      }
-    });
   }
 
   async request({ body, url }: { body: Record<string, unknown>; url: string }): Promise<unknown> {
@@ -67,14 +57,13 @@ class AzulRequester {
 
     this.eventEmitter.emit('request', { url, requestBody });
 
-    const response = await request(url, {
+    const response = await this.fetch(url, {
       method: 'POST',
       headers: {
         Auth1: this.auth1,
         Auth2: this.auth2,
         'Content-Type': 'application/json'
       },
-      dispatcher: this.agent,
       body: JSON.stringify(requestBody)
     });
 
@@ -86,8 +75,8 @@ class AzulRequester {
   }
 }
 
-async function parseJSON(response: Dispatcher.ResponseData): Promise<unknown> {
-  const text = await response.body.text();
+async function parseJSON(response: Response): Promise<unknown> {
+  const text = await response.text();
 
   try {
     return JSON.parse(text);

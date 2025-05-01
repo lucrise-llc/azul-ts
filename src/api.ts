@@ -13,7 +13,6 @@ import AzulRequester, { Config } from './request';
 import { VerifyResponse } from './verify/schemas';
 import { SaleRequest, SaleResponse } from './sale/schemas';
 import { SearchRequest, SearchResponse } from './search/schemas';
-import { parsePEM } from './parse-certificate/parse-certificate';
 import { RefundRequestInput, RefundResponse } from './refund/schemas';
 
 export class Azul extends EventEmitter {
@@ -22,8 +21,6 @@ export class Azul extends EventEmitter {
 
   constructor(config: Config) {
     super();
-    config.key = parsePEM(config.key, 'key');
-    config.certificate = parsePEM(config.certificate, 'certificate');
 
     this.requester = new AzulRequester(config, this);
     this.vault = new DataVault(this.requester);
