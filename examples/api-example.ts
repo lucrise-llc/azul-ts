@@ -2,16 +2,20 @@ import express from 'express';
 
 import { Azul } from '../src/api';
 import { env } from '../src/tests/instance';
+
 import 'dotenv/config';
 
+import { undiciFetcher } from './undici-fetcher';
 const app = express();
 
 const azul = new Azul({
   auth1: env.AUTH1,
   auth2: env.AUTH2,
   merchantId: env.MERCHANT_ID,
-  certificate: env.AZUL_CERT,
-  key: env.AZUL_KEY
+  fetch: undiciFetcher({
+    cert: env.AZUL_CERT,
+    key: env.AZUL_KEY
+  })
 });
 
 app.get('/buy', async (req, res) => {

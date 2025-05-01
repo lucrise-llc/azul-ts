@@ -1,8 +1,11 @@
 import express from 'express';
 
 import { env } from '../src/tests/instance';
-import { AzulSecure } from '../src/secure/secure';
+import { undiciFetcher } from './undici-fetcher';
+
 import 'dotenv/config';
+
+import { AzulSecure } from '../src/secure/secure';
 
 const app = express();
 app.use(express.urlencoded({ extended: true }));
@@ -30,10 +33,12 @@ const azul = new AzulSecure({
   auth1: env.AUTH1_3DS,
   auth2: env.AUTH1_3DS,
   merchantId: env.MERCHANT_ID,
-  certificate: env.AZUL_CERT,
-  key: env.AZUL_KEY,
   processMethodBaseUrl: 'http://localhost:3000/process-method',
-  processChallengeBaseUrl: 'http://localhost:3000/process-challenge'
+  processChallengeBaseUrl: 'http://localhost:3000/process-challenge',
+  fetch: undiciFetcher({
+    cert: env.AZUL_CERT,
+    key: env.AZUL_KEY
+  })
 });
 
 app.get('/', (req, res) => {
