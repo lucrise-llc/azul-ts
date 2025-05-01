@@ -1,5 +1,6 @@
 import EventEmitter from 'node:events';
 
+import { Fetcher } from './fetch';
 import { capitalizeKeys } from './utils/capitalize';
 
 enum AzulURL {
@@ -13,10 +14,8 @@ export type Config = {
   merchantId: string;
   channel?: string;
   environment?: 'dev' | 'prod';
-  fetch?: Fetcher;
+  fetch: Fetcher;
 };
-
-type Fetcher = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
 
 class AzulRequester {
   public readonly url: string;
@@ -33,7 +32,7 @@ class AzulRequester {
     this.auth2 = config.auth2;
     this.merchantId = config.merchantId;
     this.eventEmitter = eventEmitter;
-    this.fetch = config.fetch || fetch;
+    this.fetch = config.fetch;
 
     if (config.channel === undefined) {
       this.channel = 'EC';
@@ -67,21 +66,9 @@ class AzulRequester {
       body: JSON.stringify(requestBody)
     });
 
-    const responseBody = await parseJSON(response);
+    this.eventEmitter.emit('response', { url, responseBody: response });
 
-    this.eventEmitter.emit('response', { url, responseBody });
-
-    return responseBody;
-  }
-}
-
-async function parseJSON(response: Response): Promise<unknown> {
-  const text = await response.text();
-
-  try {
-    return JSON.parse(text);
-  } catch {
-    throw new Error('Did not receive JSON, instead received: ' + text);
+    return response;
   }
 }
 
