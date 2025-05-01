@@ -4,4 +4,6 @@ import { AzulSecure } from './secure/secure';
 
 export type { Storage };
 export { Azul, AzulSecure };
-export { undiciFetcher, workerFetcher } from './fetch';
+export { parsePEM } from './parse-certificate/parse-certificate';
+export { workerFetcher } from './fetch';
+export type { Fetcher } from './fetch';
