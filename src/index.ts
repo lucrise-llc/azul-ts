@@ -6,4 +6,4 @@ export type { Storage };
 export { Azul, AzulSecure };
 export { parsePEM } from './parse-certificate/parse-certificate';
 export { workerFetcher } from './fetch';
-export type { Fetcher } from './fetch';
+export type { Fetcher, RequestOptions } from './fetch';

@@ -20,5 +20,6 @@ export const env = envSchema.parse(process.env);
 export const azul = new Azul({
   auth1: env.AUTH1,
   auth2: env.AUTH2,
-  merchantId: env.MERCHANT_ID
+  merchantId: env.MERCHANT_ID,
+  fetch: fetch
 });
