@@ -14,8 +14,8 @@ export type Config = {
   merchantId: string;
   certificate: string;
   key: string;
-  environment?: 'dev' | 'prod';
   channel?: string;
+  environment: 'development' | 'production';
 };
 
 class AzulRequester {
@@ -44,10 +44,10 @@ class AzulRequester {
       this.channel = config.channel;
     }
 
-    if (config.environment === undefined || config.environment === 'dev') {
-      this.url = AzulURL.DEV;
-    } else {
+    if (config.environment === 'production') {
       this.url = AzulURL.PROD;
+    } else {
+      this.url = AzulURL.DEV;
     }
 
     this.agent = new Agent({
