@@ -10,7 +10,7 @@ import { ThreeDSChallengeResponse, ThreeDSMethodResponse } from './schemas';
 import { SuccessfulSaleResponse, ErrorSaleResponse } from '../sale/schemas';
 import { secureSale, SecureSaleRequest, secureSaleRequestSchema } from './sale';
 
-export type SecureConfig = Configuration & {
+export type SecureConfiguration = Configuration & {
   processMethodBaseUrl: string;
   processChallengeBaseUrl: string;
   storage?: Storage;
@@ -24,14 +24,14 @@ const secureIdPrefix = 'secure-id';
 
 export class AzulSecure extends Azul {
   private readonly storage: Storage;
-  public processMethodBaseUrl: string;
-  public processChallengeBaseUrl: string;
+  public readonly processMethodBaseUrl: string;
+  public readonly processChallengeBaseUrl: string;
 
-  constructor(config: SecureConfig) {
-    super(config);
-    this.processMethodBaseUrl = config.processMethodBaseUrl;
-    this.processChallengeBaseUrl = config.processChallengeBaseUrl;
-    this.storage = config.storage || new MemoryStorage();
+  constructor(configuration: SecureConfiguration) {
+    super(configuration);
+    this.processMethodBaseUrl = configuration.processMethodBaseUrl;
+    this.processChallengeBaseUrl = configuration.processChallengeBaseUrl;
+    this.storage = configuration.storage || new MemoryStorage();
   }
 
   async secureSale(
