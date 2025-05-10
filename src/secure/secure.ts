@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 
 import { Azul } from '../api';
-import { Config } from '../request';
+import { Configuration } from '../request';
 import { processThreeDSMethodInternal } from './method';
 import { MemoryStorage, Storage } from '../utils/storage';
 import { callIdempotent } from '../utils/call-idempotent';
@@ -10,7 +10,7 @@ import { ThreeDSChallengeResponse, ThreeDSMethodResponse } from './schemas';
 import { SuccessfulSaleResponse, ErrorSaleResponse } from '../sale/schemas';
 import { secureSale, SecureSaleRequest, secureSaleRequestSchema } from './sale';
 
-export type SecureConfig = Config & {
+export type SecureConfig = Configuration & {
   processMethodBaseUrl: string;
   processChallengeBaseUrl: string;
   storage?: Storage;

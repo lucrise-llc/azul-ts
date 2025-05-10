@@ -9,8 +9,8 @@ import { verify } from './verify/verify';
 import { PostRequest } from './post/schemas';
 import { voidTransaction } from './void/void';
 import DataVault from './data-vault/data-vault';
-import AzulRequester, { Config } from './request';
 import { VerifyResponse } from './verify/schemas';
+import AzulRequester, { Configuration } from './request';
 import { SaleRequest, SaleResponse } from './sale/schemas';
 import { SearchRequest, SearchResponse } from './search/schemas';
 import { parsePEM } from './parse-certificate/parse-certificate';
@@ -20,7 +20,7 @@ export class Azul extends EventEmitter {
   public readonly vault: DataVault;
   protected readonly requester: AzulRequester;
 
-  constructor(config: Config) {
+  constructor(config: Configuration) {
     super();
     config.key = parsePEM(config.key, 'key');
     config.certificate = parsePEM(config.certificate, 'certificate');

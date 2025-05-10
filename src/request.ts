@@ -8,40 +8,27 @@ enum AzulURL {
   PRODUCTION = 'https://pagos.azul.com.do/webservices/JSON/Default.aspx'
 }
 
-export type Config = {
+export type Configuration = {
   auth1: string;
   auth2: string;
   merchantId: string;
   certificate: string;
   key: string;
-  channel?: string;
+  channel: string;
   environment: 'development' | 'production';
 };
 
 class AzulRequester {
   public readonly url: string;
-
-  private auth1: string;
-  private auth2: string;
-  private channel: string;
-  private merchantId: string;
-
   private readonly agent: Agent;
   private readonly eventEmitter: EventEmitter;
+  private readonly configuration: Configuration;
 
-  constructor(config: Config, eventEmitter: EventEmitter) {
-    this.auth1 = config.auth1;
-    this.auth2 = config.auth2;
-    this.merchantId = config.merchantId;
+  constructor(configuration: Configuration, eventEmitter: EventEmitter) {
     this.eventEmitter = eventEmitter;
+    this.configuration = configuration;
 
-    if (config.channel === undefined) {
-      this.channel = 'EC';
-    } else {
-      this.channel = config.channel;
-    }
-
-    if (config.environment === 'production') {
+    if (configuration.environment === 'production') {
       this.url = AzulURL.PRODUCTION;
     } else {
       this.url = AzulURL.DEVELOPMENT;
@@ -49,16 +36,16 @@ class AzulRequester {
 
     this.agent = new Agent({
       connect: {
-        cert: config.certificate,
-        key: config.key
+        cert: configuration.certificate,
+        key: configuration.key
       }
     });
   }
 
   async request({ body, url }: { body: Record<string, unknown>; url: string }): Promise<unknown> {
     const requestBody = capitalizeKeys({
-      channel: this.channel,
-      store: this.merchantId,
+      channel: this.configuration.channel,
+      store: this.configuration.merchantId,
       ...body
     });
 
@@ -67,8 +54,8 @@ class AzulRequester {
     const response = await request(url, {
       method: 'POST',
       headers: {
-        Auth1: this.auth1,
-        Auth2: this.auth2,
+        Auth1: this.configuration.auth1,
+        Auth2: this.configuration.auth2,
         'Content-Type': 'application/json'
       },
       dispatcher: this.agent,
