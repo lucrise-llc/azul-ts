@@ -4,8 +4,8 @@ import { request, Agent, Dispatcher } from 'undici';
 import { capitalizeKeys } from './utils/capitalize';
 
 enum AzulURL {
-  DEV = 'https://pruebas.azul.com.do/webservices/JSON/Default.aspx',
-  PROD = 'https://pagos.azul.com.do/webservices/JSON/Default.aspx'
+  DEVELOPMENT = 'https://pruebas.azul.com.do/webservices/JSON/Default.aspx',
+  PRODUCTION = 'https://pagos.azul.com.do/webservices/JSON/Default.aspx'
 }
 
 export type Config = {
@@ -42,9 +42,9 @@ class AzulRequester {
     }
 
     if (config.environment === 'production') {
-      this.url = AzulURL.PROD;
+      this.url = AzulURL.PRODUCTION;
     } else {
-      this.url = AzulURL.DEV;
+      this.url = AzulURL.DEVELOPMENT;
     }
 
     this.agent = new Agent({
