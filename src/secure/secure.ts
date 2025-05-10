@@ -11,8 +11,8 @@ import { SuccessfulSaleResponse, ErrorSaleResponse } from '../sale/schemas';
 import { secureSale, SecureSaleRequest, secureSaleRequestSchema } from './sale';
 
 export type SecureConfiguration = Configuration & {
-  processMethodBaseUrl: string;
-  processChallengeBaseUrl: string;
+  processMethodURL: string;
+  processChallengeURL: string;
   storage?: Storage;
 };
 
@@ -24,13 +24,13 @@ const secureIdPrefix = 'secure-id';
 
 export class AzulSecure extends Azul {
   private readonly storage: Storage;
-  public readonly processMethodBaseUrl: string;
-  public readonly processChallengeBaseUrl: string;
+  private readonly processMethodURL: string;
+  private readonly processChallengeURL: string;
 
   constructor(configuration: SecureConfiguration) {
     super(configuration);
-    this.processMethodBaseUrl = configuration.processMethodBaseUrl;
-    this.processChallengeBaseUrl = configuration.processChallengeBaseUrl;
+    this.processMethodURL = configuration.processMethodURL;
+    this.processChallengeURL = configuration.processChallengeURL;
     this.storage = configuration.storage || new MemoryStorage();
   }
 
@@ -49,8 +49,8 @@ export class AzulSecure extends Azul {
       input: {
         ...parsedInput,
         ThreeDSAuth: {
-          TermUrl: `${this.processChallengeBaseUrl}?secureId=${secureId}`,
-          MethodNotificationUrl: `${this.processMethodBaseUrl}?secureId=${secureId}`,
+          TermUrl: `${this.processChallengeURL}?secureId=${secureId}`,
+          MethodNotificationUrl: `${this.processMethodURL}?secureId=${secureId}`,
           ...parsedInput.ThreeDSAuth
         }
       },
@@ -143,7 +143,7 @@ export class AzulSecure extends Azul {
     return `
     <form action="${response.ThreeDSChallenge.RedirectPostUrl}" method="POST">
       <input type="hidden" name="creq" value="${response.ThreeDSChallenge.CReq}" />
-      <input type="hidden" name="TermUrl" value="${`${this.processChallengeBaseUrl}?secureId=${secureId}`}" />
+      <input type="hidden" name="TermUrl" value="${`${this.processChallengeURL}?secureId=${secureId}`}" />
       <script>
         window.onload = function() {
           document.forms[0].submit();
