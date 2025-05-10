@@ -1,19 +1,20 @@
 import { randomUUID } from 'crypto';
 
+import type { Configuration } from '../request';
+import type { Storage } from '../utils/storage';
+import type { ThreeDSChallengeResponse, ThreeDSMethodResponse } from './schemas';
+import type { SuccessfulSaleResponse, ErrorSaleResponse } from '../sale/schemas';
+
 import { Azul } from '../api';
-import { Configuration } from '../request';
 import { processThreeDSMethodInternal } from './method';
-import { MemoryStorage, Storage } from '../utils/storage';
 import { callIdempotent } from '../utils/call-idempotent';
 import { processThreeDSChallengeInternal } from './challenge';
-import { ThreeDSChallengeResponse, ThreeDSMethodResponse } from './schemas';
-import { SuccessfulSaleResponse, ErrorSaleResponse } from '../sale/schemas';
 import { secureSale, SecureSaleRequest, secureSaleRequestSchema } from './sale';
 
-export type SecureConfiguration = Configuration & {
+type SecureConfiguration = Configuration & {
+  storage: Storage;
   processMethodURL: string;
   processChallengeURL: string;
-  storage?: Storage;
 };
 
 type ThreeDSChallengeResponseWithForm = ThreeDSChallengeResponse & {
@@ -29,9 +30,9 @@ export class AzulSecure extends Azul {
 
   constructor(configuration: SecureConfiguration) {
     super(configuration);
+    this.storage = configuration.storage;
     this.processMethodURL = configuration.processMethodURL;
     this.processChallengeURL = configuration.processChallengeURL;
-    this.storage = configuration.storage || new MemoryStorage();
   }
 
   async secureSale(
