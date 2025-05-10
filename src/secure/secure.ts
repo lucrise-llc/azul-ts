@@ -2,23 +2,20 @@ import { randomUUID } from 'crypto';
 
 import type { Configuration } from '../request';
 import type { Storage } from '../utils/storage';
+import type { SaleResponse } from '../sale/schemas';
+import type { SecureSaleRequest, SecureSaleResponse } from './sale';
 import type { ThreeDSChallengeResponse, ThreeDSMethodResponse } from './schemas';
-import type { SuccessfulSaleResponse, ErrorSaleResponse } from '../sale/schemas';
 
 import { Azul } from '../api';
-import { processThreeDSMethod } from './method';
 import { processThreeDSChallenge } from './challenge';
 import { callIdempotent } from '../utils/call-idempotent';
-import { secureSale, SecureSaleRequest, secureSaleRequestSchema } from './sale';
+import { secureSale, secureSaleRequestSchema } from './sale';
+import { processThreeDSMethod, ProcessThreeDSMethodResponse } from './method';
 
 type SecureConfiguration = Configuration & {
   storage: Storage;
   processMethodURL: string;
   processChallengeURL: string;
-};
-
-type ThreeDSChallengeResponseWithForm = ThreeDSChallengeResponse & {
-  form: string;
 };
 
 const secureIdPrefix = 'secure-id';
@@ -35,14 +32,7 @@ export class AzulSecure extends Azul {
     this.processChallengeURL = configuration.processChallengeURL;
   }
 
-  async secureSale(
-    input: SecureSaleRequest
-  ): Promise<
-    | SuccessfulSaleResponse
-    | ThreeDSChallengeResponseWithForm
-    | ThreeDSMethodResponse
-    | ErrorSaleResponse
-  > {
+  async secureSale(input: SecureSaleRequest): Promise<SecureSaleResponse> {
     const secureId = input.secureId ? input.secureId : randomUUID();
     const parsedInput = secureSaleRequestSchema.parse(input);
 
@@ -62,20 +52,10 @@ export class AzulSecure extends Azul {
       await this.storage.set(`${secureIdPrefix}:${secureId}`, response.AzulOrderId);
     }
 
-    if (response.type === 'challenge') {
-      return {
-        ...response,
-        form: this.generateThreeDSChallengeResponseForm({ response, secureId })
-      };
-    }
-
     return response;
   }
 
-  async processChallenge(input: {
-    CRes: string;
-    secureId: string;
-  }): Promise<SuccessfulSaleResponse | ErrorSaleResponse> {
+  async processChallenge(input: { CRes: string; secureId: string }): Promise<SaleResponse> {
     const azulOrderId = await this.storage.get(`${secureIdPrefix}:${input.secureId}`);
 
     if (!azulOrderId) {
@@ -99,11 +79,7 @@ export class AzulSecure extends Azul {
     return response;
   }
 
-  async processMethod({
-    secureId
-  }: {
-    secureId: string;
-  }): Promise<SuccessfulSaleResponse | ThreeDSChallengeResponseWithForm | ErrorSaleResponse> {
+  async processMethod({ secureId }: { secureId: string }): Promise<ProcessThreeDSMethodResponse> {
     const azulOrderId = await this.storage.get(`${secureIdPrefix}:${secureId}`);
 
     if (!azulOrderId) {
@@ -124,17 +100,14 @@ export class AzulSecure extends Azul {
       await this.storage.delete(`${secureIdPrefix}:${secureId}`);
     }
 
-    if (response.type === 'challenge') {
-      return {
-        ...response,
-        form: this.generateThreeDSChallengeResponseForm({ response, secureId })
-      };
-    }
-
     return response;
   }
 
-  private generateThreeDSChallengeResponseForm({
+  public generateMethodForm(response: ThreeDSMethodResponse): string {
+    return response.ThreeDSMethod.MethodForm.replace('target', '');
+  }
+
+  public generateChallengeForm({
     response,
     secureId
   }: {

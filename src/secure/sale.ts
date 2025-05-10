@@ -38,7 +38,7 @@ const secureSaleResponseSchema = z.union([
   errorSaleResponseSchema
 ]);
 
-type SecureSaleResponse = z.infer<typeof secureSaleResponseSchema>;
+export type SecureSaleResponse = z.infer<typeof secureSaleResponseSchema>;
 
 // Secure sale
 export async function secureSale({

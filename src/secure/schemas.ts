@@ -28,8 +28,7 @@ export const threeDSMethodResponseSchema = z
   })
   .transform((response) => ({
     ...response,
-    type: 'method' as const,
-    form: response.ThreeDSMethod.MethodForm.replace('target', '')
+    type: 'method' as const
   }));
 
 export type ThreeDSChallengeResponse = z.infer<typeof threeDSChallengeResponseSchema>;
