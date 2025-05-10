@@ -12,7 +12,8 @@ const envSchema = z.object({
   AUTH2_3DS: z.string(),
   MERCHANT_ID: z.string(),
   AZUL_CERT: z.string(),
-  AZUL_KEY: z.string()
+  AZUL_KEY: z.string(),
+  CHANNEL: z.string()
 });
 
 export const env = envSchema.parse(process.env);
@@ -23,5 +24,6 @@ export const azul = new Azul({
   merchantId: env.MERCHANT_ID,
   certificate: env.AZUL_CERT,
   key: env.AZUL_KEY,
+  channel: env.CHANNEL,
   environment: 'development'
 });
