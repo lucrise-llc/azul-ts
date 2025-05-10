@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import AzulRequester from '../request';
+import { MethodNotificationStatus } from './types';
 import { threeDSChallengeResponseSchema } from './schemas';
 import { errorSaleResponseSchema, successfulSaleResponseSchema } from '../sale/schemas';
 
@@ -22,7 +23,7 @@ export async function processThreeDSMethodInternal({
   const response = await requester.request({
     body: {
       AzulOrderId: azulOrderId,
-      MethodNotificationStatus: 'RECEIVED'
+      MethodNotificationStatus: MethodNotificationStatus.RECEIVED
     },
     url: requester.url + '?ProcessThreedsMethod'
   });
