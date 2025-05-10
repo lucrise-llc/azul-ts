@@ -6,9 +6,9 @@ import type { ThreeDSChallengeResponse, ThreeDSMethodResponse } from './schemas'
 import type { SuccessfulSaleResponse, ErrorSaleResponse } from '../sale/schemas';
 
 import { Azul } from '../api';
-import { processThreeDSMethodInternal } from './method';
+import { processThreeDSMethod } from './method';
+import { processThreeDSChallenge } from './challenge';
 import { callIdempotent } from '../utils/call-idempotent';
-import { processThreeDSChallengeInternal } from './challenge';
 import { secureSale, SecureSaleRequest, secureSaleRequestSchema } from './sale';
 
 type SecureConfiguration = Configuration & {
@@ -84,7 +84,7 @@ export class AzulSecure extends Azul {
 
     const response = await callIdempotent({
       storage: this.storage,
-      fn: processThreeDSChallengeInternal,
+      fn: processThreeDSChallenge,
       input: {
         requester: this.requester,
         body: {
@@ -112,7 +112,7 @@ export class AzulSecure extends Azul {
 
     const response = await callIdempotent({
       storage: this.storage,
-      fn: processThreeDSMethodInternal,
+      fn: processThreeDSMethod,
       input: {
         azulOrderId,
         requester: this.requester

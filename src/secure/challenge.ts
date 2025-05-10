@@ -10,7 +10,7 @@ const processThreeDSChallengeRequestSchema = z.object({
 
 export type ProcessThreeDSChallengeRequest = z.infer<typeof processThreeDSChallengeRequestSchema>;
 
-export async function processThreeDSChallengeInternal({
+export async function processThreeDSChallenge({
   body,
   requester
 }: {

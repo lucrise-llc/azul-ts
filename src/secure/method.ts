@@ -13,7 +13,7 @@ const processThreeDSMethodResponseSchema = z.union([
 
 export type ProcessThreeDSMethodResponse = z.infer<typeof processThreeDSMethodResponseSchema>;
 
-export async function processThreeDSMethodInternal({
+export async function processThreeDSMethod({
   azulOrderId,
   requester
 }: {
