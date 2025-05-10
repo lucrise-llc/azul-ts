@@ -11,7 +11,9 @@ const azul = new Azul({
   auth2: env.AUTH2,
   merchantId: env.MERCHANT_ID,
   certificate: env.AZUL_CERT,
-  key: env.AZUL_KEY
+  key: env.AZUL_KEY,
+  environment: 'development',
+  channel: 'EC'
 });
 
 app.get('/buy', async (req, res) => {

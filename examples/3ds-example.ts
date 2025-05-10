@@ -27,6 +27,8 @@ const CARDS = [
 ];
 
 const azul = new AzulSecure({
+  channel: 'EC',
+  environment: 'development',
   auth1: env.AUTH1_3DS,
   auth2: env.AUTH1_3DS,
   merchantId: env.MERCHANT_ID,
