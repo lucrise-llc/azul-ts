@@ -25,8 +25,7 @@ class AzulRequester {
   private auth2: string;
   private channel: string;
   private merchantId: string;
-  private certificate: string;
-  private key: string;
+
   private readonly agent: Agent;
   private readonly eventEmitter: EventEmitter;
 
@@ -34,8 +33,6 @@ class AzulRequester {
     this.auth1 = config.auth1;
     this.auth2 = config.auth2;
     this.merchantId = config.merchantId;
-    this.certificate = config.certificate;
-    this.key = config.key;
     this.eventEmitter = eventEmitter;
 
     if (config.channel === undefined) {
@@ -52,8 +49,8 @@ class AzulRequester {
 
     this.agent = new Agent({
       connect: {
-        cert: this.certificate,
-        key: this.key
+        cert: config.certificate,
+        key: config.key
       }
     });
   }
