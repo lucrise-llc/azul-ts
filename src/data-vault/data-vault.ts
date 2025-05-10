@@ -1,12 +1,14 @@
 import AzulRequester from '../request';
 import {
-  createDataVaultSchema,
-  deleteDataVaultSchema,
+  // Create
   CreateDataVault,
+  createDataVaultSchema,
   CreateDataVaultResponse,
-  DeleteDataVault,
-  DeleteDataVaultResponse,
   createDataVaultResponseSchema,
+  // Delete
+  DeleteDataVault,
+  deleteDataVaultSchema,
+  DeleteDataVaultResponse,
   deleteDataVaultResponseSchema
 } from './schemas';
 
