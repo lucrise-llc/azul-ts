@@ -2,7 +2,10 @@ import express from 'express';
 
 import { env } from '../src/tests/instance';
 import { AzulSecure } from '../src/secure/secure';
+
 import 'dotenv/config';
+
+import { MemoryStorage } from '../src/utils/storage';
 
 const app = express();
 app.use(express.urlencoded({ extended: true }));
@@ -27,6 +30,7 @@ const CARDS = [
 ];
 
 const azul = new AzulSecure({
+  storage: new MemoryStorage(),
   channel: 'EC',
   environment: 'development',
   auth1: env.AUTH1_3DS,
@@ -34,8 +38,8 @@ const azul = new AzulSecure({
   merchantId: env.MERCHANT_ID,
   certificate: env.AZUL_CERT,
   key: env.AZUL_KEY,
-  processMethodBaseUrl: 'http://localhost:3000/process-method',
-  processChallengeBaseUrl: 'http://localhost:3000/process-challenge'
+  processMethodURL: 'http://localhost:3000/process-method',
+  processChallengeURL: 'http://localhost:3000/process-challenge'
 });
 
 app.get('/', (req, res) => {
@@ -74,11 +78,16 @@ app.get('/buy', async (req, res) => {
   }
 
   if (result.type === 'challenge') {
-    res.send(result.form);
+    const form = azul.generateChallengeForm({
+      response: result,
+      secureId: result.AzulOrderId
+    });
+    res.send(form);
   }
 
   if (result.type === 'method') {
-    res.send(result.form);
+    const form = azul.generateMethodForm(result);
+    res.send(form);
   }
 
   if (result.type === 'error') {
@@ -122,7 +131,11 @@ app.post('/process-method', async (req, res) => {
   }
 
   if (result.type === 'challenge') {
-    res.send(result.form);
+    const form = azul.generateChallengeForm({
+      response: result,
+      secureId
+    });
+    res.send(form);
   }
 
   if (result.type === 'error') {
