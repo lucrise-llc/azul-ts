@@ -39,6 +39,8 @@ jobs:
           MERCHANT_ID: ${{ secrets.MERCHANT_ID }}
           AZUL_KEY: ${{ secrets.AZUL_KEY }}
           AZUL_CERT: ${{ secrets.AZUL_CERT }}
+          CHANNEL: ${{ secrets.CHANNEL }}
+
         run: npx playwright test
       - uses: actions/upload-artifact@v4
         if: always()
@@ -65,6 +67,8 @@ jobs:
           MERCHANT_ID: ${{ secrets.MERCHANT_ID }}
           AZUL_KEY: ${{ secrets.AZUL_KEY }}
           AZUL_CERT: ${{ secrets.AZUL_CERT }}
+          CHANNEL: ${{ secrets.CHANNEL }}
+          
         run: npm run test
 
   release:
