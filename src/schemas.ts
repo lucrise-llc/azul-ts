@@ -13,4 +13,4 @@ export const customerServicePhone = z.string().max(32);
 export const ECommerceURL = z.string().max(32);
 export const customOrderId = z.string().max(75).optional();
 export const saveToDataVault = z.enum(['1', '2']).optional();
-export const forceNo3DS = z.enum(['0', '1']);
+export const forceNo3DS = z.boolean();

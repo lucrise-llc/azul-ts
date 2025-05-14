@@ -52,7 +52,7 @@ export async function secureSale({
     url: requester.url,
     body: {
       ...secureSaleRequestSchema.parse(input),
-      ForceNo3DS: '0',
+      ForceNo3DS: input.forceNo3DS ? '1' : '0',
       TrxType: 'Sale'
     }
   });

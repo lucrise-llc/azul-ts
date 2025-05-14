@@ -8,7 +8,8 @@ import {
   customOrderId,
   expiration,
   posInputMode,
-  saveToDataVault
+  saveToDataVault,
+  forceNo3DS
 } from '../schemas';
 
 // Sale Request
@@ -21,7 +22,8 @@ export const cardPaymentSchema = z.object({
   expiration,
   CVC,
   posInputMode,
-  saveToDataVault
+  saveToDataVault,
+  forceNo3DS
 });
 
 export const tokenPaymentSchema = z.object({
@@ -31,7 +33,8 @@ export const tokenPaymentSchema = z.object({
   ITBIS,
   dataVaultToken: z.string().max(36),
   posInputMode,
-  expiration: z.literal('').default('')
+  expiration: z.literal('').default(''),
+  forceNo3DS
 });
 
 export const saleRequestSchema = z.union([cardPaymentSchema, tokenPaymentSchema]);
